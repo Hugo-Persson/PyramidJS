@@ -1,13 +1,13 @@
 import { Controller } from "../lib/Controller";
 
 export class Index extends Controller {
-    constructor(message: string) {
-        super();
-        console.log(message);
+    constructor(req: Request, res: Response) {
+        super(req, res);
+
     }
 
     Index() {
-        console.log("HELLO WORLDD");
+
     }
 
 }

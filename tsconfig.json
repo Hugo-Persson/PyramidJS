@@ -6,9 +6,13 @@
         "target": "es6",
         "moduleResolution": "node",
         "sourceMap": true,
-        "outDir": "src",
-        "rootDir": "typescript",
-        "baseUrl": "./typescript"
+        "outDir": "build",
+        "rootDir": "./typescript",
+        "baseUrl": "./typescript",
+        "paths": {
+            "@controller/*":["controllers/*"],
+            "@lib/*":["lib/*"],
+        }
     },
     "lib": [
         "es2015"
