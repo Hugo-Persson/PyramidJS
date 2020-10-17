@@ -1,13 +1,12 @@
-import { Controller } from "../lib/Controller";
+import Controller from "../lib/Controller";
 
-export class Index extends Controller {
-    constructor(req: Request, res: Response) {
-        super(req, res);
+export default class Index extends Controller {
 
+    public Index() {
+        console.log("This is the index method, it is called when no actions is specified");
     }
-
-    Index() {
-
+    public NewUser() {
+        this.res.Send("Create a new user here");
     }
 
 }
