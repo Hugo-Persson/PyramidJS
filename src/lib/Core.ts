@@ -6,37 +6,33 @@ import Initialize from "@lib/Initialize";
 import Request from "@lib/Request";
 import Response from "@lib/Response";
 
-
 export default class Core {
     private port: number = parseInt(process.env.PORT) || 3000;
-
 
     private server: http.Server;
     private initObj: Initialize;
     /**
      * @param {Initialize} init - Your init object
-     * 
+     *
      */
     constructor(init: Initialize) {
-        init.PreStart();
-        this.StartServer();
+        init.preStart();
+        this.startServer();
         this.initObj = init;
-        init.PostStart(this.port);
-
+        init.postStart(this.port);
     }
-    private StartServer(): void {
-        this.server = http.createServer(this.HandleHttpRequest);
+    private startServer(): void {
+        this.server = http.createServer(this.handleHttpRequest);
         this.server.listen(this.port);
     }
 
-    private ImportController(controller: string): Promise<Controller> {
+    private importController(controller: string): Promise<Controller> {
         return new Promise<Controller>(async (resolve, reject) => {
             try {
-                var importedFile = await import(`../controllers/${controller}`);
-                var ImportedClass = importedFile.default;
-            }
-            catch (error) {
-                reject("404")
+                var importedFile = await import(`../controllers/${controller}`); // eslint-disable-line no-use-before-define
+                var ImportedClass = importedFile.default; // eslint-disable-line no-use-before-define
+            } catch (error) {
+                reject("404");
                 return;
             }
             if (!ImportedClass) {
@@ -44,7 +40,7 @@ export default class Core {
                 return;
             }
             if (!(ImportedClass.prototype instanceof Controller)) {
-                reject("404")
+                reject("404");
             }
             const instance = new ImportedClass();
             console.log(instance);
@@ -53,46 +49,44 @@ export default class Core {
         });
     }
 
-
-    private HandleHttpRequest = async (req: http.IncomingMessage, res: http.OutgoingMessage): Promise<void> => {
+    private handleHttpRequest = async (
+        req: http.IncomingMessage,
+        res: http.ServerResponse
+    ): Promise<void> => {
         const chunks: Array<string> = req.url.split("/");
 
         chunks.shift(); // Remove empty element in the start
         let controller: Controller | Initialize;
         let action: Function;
 
-        if (chunks[0] == "") { // the / route
+        if (chunks[0] == "") {
+            // the / route
             controller = this.initObj;
-            action = this.initObj.IndexAction;
-        }
-        else {
+            action = this.initObj.indexAction;
+        } else {
             if (chunks.length == 1) {
                 chunks.push("Index"); // If they don't specify a action then we default it to an index action
             }
             try {
-                controller = await this.ImportController(chunks[0]);
+                controller = await this.importController(chunks[0]);
                 if (controller[chunks[1]]) {
                     action = controller[chunks[1]];
-                }
-                else {
+                } else {
                     controller = this.initObj;
-                    action = this.initObj.NoPageFound;
+                    action = this.initObj.noPageFound;
                 }
-            }
-            catch (error) {
+            } catch (error) {
                 if (error == "404") {
                     controller = this.initObj;
-                    action = this.initObj.NoPageFound;
+                    action = this.initObj.noPageFound;
                 }
             }
         }
 
         controller.req = new Request(req);
         controller.res = new Response(res);
-        action.bind(controller)(); // I don't want to force the user to declare arrow functions for every function so instead I overwrite the this and now they can write this.req
-    }
-
-
-
+        await action.bind(controller)(); // I don't want to force the user to declare arrow functions for every function so instead I overwrite the this and now they can write this.req
+        controller.res.end();
+        console.log("ended");
+    };
 }
-

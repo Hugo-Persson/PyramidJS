@@ -5,5 +5,4 @@ export default class Request {
     constructor(req: http.IncomingMessage) {
         this.req = req;
     }
-
 }

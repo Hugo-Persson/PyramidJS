@@ -5,22 +5,21 @@ export default abstract class Initialize {
     req: Request;
     res: Response;
 
-    PreStart(): void {
+    preStart(): void {
         return;
     }
-    PostStart(port: number): void {
+    postStart(port: number): void {
         return;
     }
     /**
      * @description For 404 requests, do not call it instead use res.throw404()
-     * 
+     *
      */
-    abstract NoPageFound();
+    abstract noPageFound(): void;
 
     /**
      * @description When the user want to reach the path "/"
-     * 
+     *
      */
-    abstract IndexAction();
-
+    abstract indexAction(): void;
 }

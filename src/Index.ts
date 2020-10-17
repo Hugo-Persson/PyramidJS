@@ -1,7 +1,6 @@
-import 'module-alias/register';
+import "module-alias/register";
 import Core from "@lib/Core";
 import Initialize from "@lib/Initialize";
-
 
 class Start extends Initialize {
     core: Core;
@@ -9,16 +8,15 @@ class Start extends Initialize {
         super();
         this.core = new Core(this);
     }
-    PostStart() {
+    postStart() {
         console.log("Server up and running");
     }
 
-    NoPageFound() {
-        this.res.Send("404 and heartbreak");
+    noPageFound() {
+        this.res.send("404 and heartbreak");
     }
-    IndexAction() {
-        this.res.Send("You have reaced the index \n Hello");
-        console.log("hell")
+    indexAction() {
+        this.res.sendFile(__dirname + "/index.html");
     }
 }
 new Start();
