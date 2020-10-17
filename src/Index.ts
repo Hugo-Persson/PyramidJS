@@ -1,3 +1,4 @@
+import 'module-alias/register';
 import Core from "@lib/Core";
 import Initialize from "@lib/Initialize";
 import { start } from "repl";

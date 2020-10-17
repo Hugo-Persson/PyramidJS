@@ -7,11 +7,15 @@
         "moduleResolution": "node",
         "sourceMap": true,
         "outDir": "build",
-        "rootDir": "./typescript",
-        "baseUrl": "./typescript",
+        "rootDir": "src",
+        "baseUrl": "./src",
         "paths": {
-            "@controller/*":["controllers/*"],
-            "@lib/*":["lib/*"],
+            "@controller/*": [
+                "controllers/*"
+            ],
+            "@lib/*": [
+                "lib/*"
+            ],
         }
     },
     "lib": [

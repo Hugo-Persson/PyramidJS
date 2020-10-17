@@ -1,4 +1,3 @@
-import 'module-alias/register';
 import readline from "readline";
 import http from "http";
 // ---------------------------------- //
@@ -20,9 +19,21 @@ export default class Core {
     }
     private StartServer() {
         this.server = http.createServer(this.HandleHttpRequest);
+        this.server.listen(this.port);
     }
     private HandleHttpRequest(req: http.IncomingMessage, res: http.OutgoingMessage) {
+        const chunks: Array<string> = req.url.split("/");
+        chunks.shift();
+        if (chunks.length == 0) {
+            // Implement index route or something like that
+        }
+        else if (chunks.length == 1) {
 
+        }
+        else {
+
+        }
+        console.log(chunks);
     }
 }
 
@@ -31,11 +42,6 @@ export default class Core {
 
 
 
-
-async function asyncRun() {
-
-
-}
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
