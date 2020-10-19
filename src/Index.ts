@@ -16,7 +16,7 @@ class Start extends Initialize {
         this.res.send("404 and heartbreak");
     }
     indexAction() {
-        this.res.sendFile(__dirname + "/index.html");
+        this.res.sendFile(process.cwd()+"/resources/index.html");
     }
 }
 new Start();

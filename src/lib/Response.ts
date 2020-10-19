@@ -3,7 +3,7 @@ import fs, { ReadStream } from "fs";
 import mime from "mime-types";
 export default class Response {
     private res: http.ServerResponse;
-
+    public sendingFile : boolean = false;
     constructor(res: http.ServerResponse) {
         this.res = res;
     }
@@ -20,6 +20,8 @@ export default class Response {
         });
         const readStream: ReadStream = fs.createReadStream(path);
         readStream.pipe(this.res);
+        this.sendingFile=true;
+        
     }
     end() {
         this.res.end();

@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc -w"
+    "dev": "nodemon --watch 'src/**' --ext 'ts,json' --ignore 'src/**/*.spec.ts' --exec 'ts-node src/index.ts'",
+    "build": "tsc src && echo Warning, you need to move all your files not located in resources to build folder"
   },
   "repository": {
     "type": "git",
@@ -35,7 +36,7 @@
     "module-alias": "^2.2.2"
   },
   "_moduleAliases": {
-    "@controllers": "build/controllers",
-    "@lib": "build/lib"
+    "@controllers": "src/controllers",
+    "@lib": "src/lib"
   }
 }

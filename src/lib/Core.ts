@@ -86,7 +86,7 @@ export default class Core {
         controller.req = new Request(req);
         controller.res = new Response(res);
         await action.bind(controller)(); // I don't want to force the user to declare arrow functions for every function so instead I overwrite the this and now they can write this.req
-        controller.res.end();
+        if(!controller.res.sendingFile) controller.res.end();
         console.log("ended");
     };
 }
