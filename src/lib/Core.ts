@@ -65,7 +65,7 @@ export default class Core {
             action = this.initObj.indexAction;
         } else {
             if (chunks.length == 1) {
-                chunks.push("Index"); // If they don't specify a action then we default it to an index action
+                chunks.push("index"); // If they don't specify a action then we default it to an index action
             }
             try {
                 controller = await this.importController(chunks[0]);

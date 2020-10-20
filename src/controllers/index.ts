@@ -10,4 +10,7 @@ export default class Index extends Controller {
     public newUser(): void {
         this.res.send("Create a new user here");
     }
+    public getUserFile(): void {
+        this.res.download(process.cwd() + "/resources/index.html");
+    }
 }
