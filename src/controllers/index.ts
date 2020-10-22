@@ -20,11 +20,11 @@ export default class Index extends Controller {
 
 
 }
-function middlewareExample(req: Request, res: Response, next: Function) {
+function middlewareExample(req: Request, res: Response, next: Function): void {
     console.log("WHOAH I AM A MIDDLEWARE");
     next();
 }
-function middlewareExampleSecond(req: Request, res: Response, next: Function) {
+function middlewareExampleSecond(req: Request, res: Response, next: Function): void {
     console.log("WHOAH I AM ALSO A MIDDLEWARE");
     next();
 }
