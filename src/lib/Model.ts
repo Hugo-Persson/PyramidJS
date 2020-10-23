@@ -7,50 +7,44 @@ export default abstract class Model {
     static getRowByFilter(filter: object) {
         // Will find a row dependent on the filter
     }
+
     /**
-     * get
+     * belongsToMany
      */
-    public getDependantRows() {
+    public belongsToMany() {
 
     }
-    /** -- Okay I need to rename this  BELONGS TO, HAS MANY s
-     * getSingle
-     * @description - Returns the
-     */
-    public getDependingRows() {
 
+    /**
+     * belongTo
+     */
+    public belongTo() {
+        
     }
     /**
-     * BelongsToMany
+     * hasMany
      */
-    public BelongsToMany() {
-
+    public hasMany() {
+        
     }
-
+    /**
+     * hasOne
+     */
+    public hasOne(): Model {
+        
+    }
 
     /* I want syntax like 
     
     class Users extends Model{
         
         get messages(){
-            this.hasMany(modelclass/"modelname",[myColymns("userClassColumns")],[])
+            this.hasMany(modelclass/"modelname",primaryKey, forreignKey)
         }
+        
 
     }
 
     */
-
-    // So for example we have something like this
-
-    /* 
-    
-    User table
-    
-
-    MEssages table 
-
-    Files Every file has one message but every message has many files
-    */
-
 
 }
