@@ -2,6 +2,7 @@ import Controller from "../lib/Controller";
 import { addMiddleware, IMiddlewareFunction } from "@lib/Middleware"
 import Request from "@lib/Request";
 import Response from "@lib/Response";
+import Users from "@models/Cars";
 
 export default class Index extends Controller {
     public index(): void {
@@ -16,6 +17,10 @@ export default class Index extends Controller {
     }
     public getUserFile(): void {
         this.res.download(process.cwd() + "/resources/index.html");
+    }
+    public tryModels(): void {
+        const userInstance = new Users();
+        console.log(userInstance.cars);
     }
 
 

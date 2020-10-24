@@ -1,7 +1,12 @@
 import Model from "@lib/Model";
-import Cars from 
-export default class Users extends Model{
-    
+import Cars from "@models/Cars"
+export default class Users extends Model {
 
-    get cars():
+
+    public get myCars() {
+        return this.hasOne(Cars);
+    }
+    public set myCars(val) {
+        return;
+    }
 }

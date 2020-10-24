@@ -11,27 +11,27 @@ export default abstract class Model {
     /**
      * belongsToMany
      */
-    public belongsToMany() {
+    protected belongsToMany() {
 
     }
 
     /**
      * belongTo
      */
-    public belongTo() {
-        
+    protected belongTo() {
+
     }
     /**
      * hasMany
      */
-    public hasMany() {
-        
+    protected hasMany() {
+
     }
     /**
      * hasOne
      */
-    public hasOne(): Model {
-        
+    protected hasOne(relatedModel): Model {
+        return new relatedModel();
     }
 
     /* I want syntax like 

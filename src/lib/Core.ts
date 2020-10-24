@@ -31,6 +31,7 @@ export default class Core {
             try {
                 var importedFile = await import(`../controllers/${controller}`); // eslint-disable-line no-use-before-define
                 var ImportedClass = importedFile.default; // eslint-disable-line no-use-before-define
+                console.log(ImportedClass);
             } catch (error) {
                 reject("404");
                 return;
@@ -86,7 +87,7 @@ export default class Core {
         controller.req = new Request(req);
         controller.res = new Response(res);
         await action.bind(controller)(); // I don't want to force the user to declare arrow functions for every function so instead I overwrite the this and now they can write this.req
-        if(!controller.res.sendingFile) controller.res.end();
+        if (!controller.res.sendingFile) controller.res.end();
         console.log("ended");
     };
 }
