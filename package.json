@@ -37,6 +37,7 @@
   },
   "_moduleAliases": {
     "@controllers": "src/controllers",
-    "@lib": "src/lib"
+    "@lib": "src/lib",
+    "@models":"src/models"
   }
 }

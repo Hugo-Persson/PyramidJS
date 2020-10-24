@@ -29,8 +29,11 @@ export default abstract class Model {
     }
     /**
      * hasOne
+     * @param {any} relatedModel - An class that inherits from model class. 
+     * @param {string} primaryKey - The primary key of this class, (the keys)
+     * @param {string} forreignKey - The f
      */
-    protected hasOne(relatedModel): Model {
+    protected hasOne(relatedModel: any, primaryKey: string, forreignKey:string): Model {
         return new relatedModel();
     }
 

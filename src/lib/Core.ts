@@ -6,6 +6,8 @@ import Initialize from "@lib/Initialize";
 import Request from "@lib/Request";
 import Response from "@lib/Response";
 
+import Index from "../controllers/Index";
+
 export default class Core {
     private port: number = parseInt(process.env.PORT) || 3000;
 
@@ -29,17 +31,23 @@ export default class Core {
     private importController(controller: string): Promise<Controller> {
         return new Promise<Controller>(async (resolve, reject) => {
             try {
+                console.log("start",`../controllers/${controller}` );
                 var importedFile = await import(`../controllers/${controller}`); // eslint-disable-line no-use-before-define
+                console.log(importedFile);
                 var ImportedClass = importedFile.default; // eslint-disable-line no-use-before-define
                 console.log(ImportedClass);
             } catch (error) {
+               
                 reject("404");
                 return;
             }
+            console.log("2");
             if (!ImportedClass) {
                 reject("404");
                 return;
             }
+            console.log("3");
+            
             if (!(ImportedClass.prototype instanceof Controller)) {
                 reject("404");
             }

@@ -2,7 +2,7 @@ import Controller from "../lib/Controller";
 import { addMiddleware, IMiddlewareFunction } from "@lib/Middleware"
 import Request from "@lib/Request";
 import Response from "@lib/Response";
-import Users from "@models/Cars";
+import Users from "@models/Users";
 
 export default class Index extends Controller {
     public index(): void {
@@ -20,7 +20,8 @@ export default class Index extends Controller {
     }
     public tryModels(): void {
         const userInstance = new Users();
-        console.log(userInstance.cars);
+        console.log("INSANCE",userInstance.myCars);
+        this.res.send("Arrived");
     }
 
 
