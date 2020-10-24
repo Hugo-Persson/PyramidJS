@@ -1,12 +1,12 @@
-import readline from "readline";
+require('dotenv').config()
 import http from "http";
 // ---------------------------------- //
 import Controller from "@lib/Controller";
 import Initialize from "@lib/Initialize";
 import Request from "@lib/Request";
 import Response from "@lib/Response";
+import Model from "@lib/Model";
 
-import Index from "../controllers/Index";
 
 export default class Core {
     private port: number = parseInt(process.env.PORT) || 3000;
@@ -18,36 +18,36 @@ export default class Core {
      *
      */
     constructor(init: Initialize) {
-        init.preStart();
-        this.startServer();
         this.initObj = init;
-        init.postStart(this.port);
+        this.startServer();
     }
-    private startServer(): void {
+    private async startServer(): Promise<void> {
+        console.log("Start");
+        this.initObj.preStart();
+        await Model.startDatabaseConnection();
         this.server = http.createServer(this.handleHttpRequest);
-        this.server.listen(this.port);
+        this.server.listen(this.port, "localhost", () => this.initObj.postStart(this.port));
+
     }
 
     private importController(controller: string): Promise<Controller> {
         return new Promise<Controller>(async (resolve, reject) => {
             try {
-                console.log("start",`../controllers/${controller}` );
+                console.log("start", `../controllers/${controller}`);
                 var importedFile = await import(`../controllers/${controller}`); // eslint-disable-line no-use-before-define
                 console.log(importedFile);
                 var ImportedClass = importedFile.default; // eslint-disable-line no-use-before-define
                 console.log(ImportedClass);
             } catch (error) {
-               
-                reject("404");
+                if (error.code == "MODULE_NOT_FOUND") reject("404");
+                else reject(error);
                 return;
             }
-            console.log("2");
             if (!ImportedClass) {
                 reject("404");
                 return;
             }
-            console.log("3");
-            
+
             if (!(ImportedClass.prototype instanceof Controller)) {
                 reject("404");
             }

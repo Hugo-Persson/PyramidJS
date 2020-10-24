@@ -12,16 +12,19 @@ export default class Index extends Controller {
     }
 
     @addMiddleware([middlewareExample, middlewareExampleSecond])
-    public newUser(): void {
+    public async newUser(): Promise<void> {
+
+        const user = new Users("Hugo");
+        await user.save();
         this.res.send("Create a new user here");
+
     }
     public getUserFile(): void {
         this.res.download(process.cwd() + "/resources/index.html");
     }
     public tryModels(): void {
-        const userInstance = new Users();
-        console.log("INSANCE",userInstance.myCars);
-        this.res.send("Arrived");
+        //const userInstance = new Users();
+
     }
 
 
