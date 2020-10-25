@@ -1,13 +1,17 @@
-import Model from "@lib/Model";
+import { Model, column } from "@lib/Model";
 import Cars from "@models/Cars"
 export default class Users extends Model {
+    @column
     public id: number = undefined;
+    @column
     public name: string = undefined;
 
+    tableName = "users"
 
     constructor(name: string) {
         super();
         this.name = name;
+
     }
 
     public get myCars() {
@@ -16,3 +20,4 @@ export default class Users extends Model {
     }
 
 }
+

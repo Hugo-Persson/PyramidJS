@@ -5,7 +5,7 @@ import Controller from "@lib/Controller";
 import Initialize from "@lib/Initialize";
 import Request from "@lib/Request";
 import Response from "@lib/Response";
-import Model from "@lib/Model";
+import { Model } from "@lib/Model";
 
 
 export default class Core {
@@ -78,6 +78,7 @@ export default class Core {
             }
             try {
                 controller = await this.importController(chunks[0]);
+                console.log(controller);
                 if (controller[chunks[1]]) {
                     action = controller[chunks[1]];
                 } else {
@@ -85,9 +86,14 @@ export default class Core {
                     action = this.initObj.noPageFound;
                 }
             } catch (error) {
+
                 if (error == "404") {
                     controller = this.initObj;
                     action = this.initObj.noPageFound;
+                }
+                else {
+                    console.log(error);
+                    return;
                 }
             }
         }

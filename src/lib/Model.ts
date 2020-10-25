@@ -1,14 +1,15 @@
 import { rejects } from "assert";
 import { time } from "console";
 import mariadb from "mariadb";
-export default abstract class Model {
+export abstract class Model {
 
     public static dbConnection: mariadb.PoolConnection;
     public static dbPool: mariadb.Pool;
 
     protected tableName: string;
+    public tableColumns: Array<string> = [];
 
-    protected newlyCreated: boolean = false;
+    protected newlyCreated: boolean = true;
 
 
     public static startDatabaseConnection() {
@@ -36,7 +37,7 @@ export default abstract class Model {
 
     }
     private async insertOne(): Promise<void> {
-        const columns: Array<string> = Object.keys(this).filter(i => i !== undefined);
+        const columns: Array<string> = this.tableColumns.filter(i => i !== undefined);
         const values = columns.map(i => this[i]);
         const questionMarks = values.map(e => "?").join(",");
         let queryString = `INSERT INTO ${this.tableName} (${columns.join(", ")}) VALUES (${questionMarks})`;
@@ -107,4 +108,10 @@ export default abstract class Model {
 
     */
 
+}
+
+
+export function column(target: any, propertyKey: string) {
+    //target.tableColumns.push(propertyKey);
+    console.log("TARGET", JSON.stringify(this));
 }
