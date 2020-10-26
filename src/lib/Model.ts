@@ -7,11 +7,15 @@ export abstract class Model {
     public static dbPool: mariadb.Pool;
 
     protected tableName: string;
-    public tableColumns: Array<string> = [];
+    private tableColumns: Array<string>;
 
     protected newlyCreated: boolean = true;
 
 
+    constructor() {
+        this.tableColumns = Object.getPrototypeOf(this).tableColumns
+
+    }
     public static startDatabaseConnection() {
         return new Promise(async (resolve, reject) => {
             this.dbPool = mariadb.createPool({
@@ -113,5 +117,6 @@ export abstract class Model {
 
 export function column(target: any, propertyKey: string) {
     //target.tableColumns.push(propertyKey);
-    console.log("TARGET", JSON.stringify(this));
+    if (!target.tableColumns) target.tableColumns = [];
+    target.tableColumns.push(propertyKey)
 }

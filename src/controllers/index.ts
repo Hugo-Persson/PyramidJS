@@ -3,6 +3,7 @@ import { addMiddleware, IMiddlewareFunction } from "@lib/Middleware"
 import Request from "@lib/Request";
 import Response from "@lib/Response";
 import Users from "@models/Users";
+import Cars from "@models/Cars";
 
 export default class Index extends Controller {
     public index(): void {
@@ -16,6 +17,7 @@ export default class Index extends Controller {
 
         const user = new Users("Hugo");
         await user.save();
+        const cars = new Cars(35);
         this.res.send("Create a new user here");
 
     }
