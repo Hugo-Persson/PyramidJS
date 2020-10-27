@@ -21,6 +21,9 @@ export default class Index extends Controller {
         this.res.send("Create a new user here");
 
     }
+    public async getUserByFilter(): Promise<void> {
+
+    }
     public getUserFile(): void {
         this.res.download(process.cwd() + "/resources/index.html");
     }
