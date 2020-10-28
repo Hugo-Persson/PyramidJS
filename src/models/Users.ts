@@ -8,9 +8,10 @@ export default class Users extends Model {
 
     tableName = "users";
 
-    constructor(name: string) {
+    constructor(id?: number, name?: string) {
         super();
 
+        this.id = id;
         this.name = name;
     }
 

@@ -58,16 +58,27 @@ export abstract class Model {
      * get
      * @param {Model} filter - a object with keys and values after what you want to filet, for example {id:32,name:"hugo"} then server will return all rows that fufill this
      */
-    protected static getRowByFilter(filter: Model, ModelChild: any) {
-        const whereQueryStringArray: Array<string> = filter.tableColumns.map(
-            (e) => {
-                if (filter[e]) return `${e}=${filter[e]}`;
+    public static getRowByFilter(
+        filter: Model,
+        ModelChild: any
+    ): Promise<Model> {
+        return new Promise<Model>(async (resolve, reject) => {
+            const values = [];
+            const filterColumns = [];
+            filter.tableColumns.map((e) => {
+                if (filter[e]) {
+                    values.push(filter[e]);
+                    filterColumns.push(`${e}=?`);
+                }
+            });
+            console.log(filterColumns);
+            // Will find a row dependent on the filter
+            const query = `SELECT * FROM  ${
+                filter.tableName
+            } WHERE ${filterColumns.join(",")}`;
 
-            }
-        );
-        // Will find a row dependent on the filter
-        const query = `SELECT * FROM  ${filter.tableName} WHERE ${whereQueryStringArray.join(", ")}`;
-        console.log(query);
+            const queryResult = await Model.dbConnection.query(query, values);
+        });
     }
 
     /* 
@@ -79,12 +90,12 @@ export abstract class Model {
     /**
      * belongsToMany
      */
-    protected belongsToMany() { }
+    protected belongsToMany() {}
 
     /**
      * belongTo
      */
-    protected belongTo() { }
+    protected belongTo() {}
 
     /**
      * hasMany

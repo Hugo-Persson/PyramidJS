@@ -4,8 +4,10 @@ import Initialize from "@lib/Initialize";
 
 class Start extends Initialize {
     core: Core;
+
     constructor() {
         super();
+
         this.core = new Core(this);
     }
     postStart() {
@@ -16,7 +18,7 @@ class Start extends Initialize {
         this.res.send("404 and heartbreak");
     }
     indexAction() {
-        this.res.sendFile(process.cwd()+"/resources/index.html");
+        this.res.sendFile(process.cwd() + "/resources/index.html");
     }
 }
 new Start();
