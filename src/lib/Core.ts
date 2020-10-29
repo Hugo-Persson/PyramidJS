@@ -1,4 +1,4 @@
-require('dotenv').config()
+require("dotenv").config();
 import http from "http";
 // ---------------------------------- //
 import Controller from "@lib/Controller";
@@ -6,7 +6,6 @@ import Initialize from "@lib/Initialize";
 import Request from "@lib/Request";
 import Response from "@lib/Response";
 import { Model } from "@lib/Model";
-
 
 export default class Core {
     private port: number = parseInt(process.env.PORT) || 3000;
@@ -22,12 +21,12 @@ export default class Core {
         this.startServer();
     }
     private async startServer(): Promise<void> {
-        console.log("Start");
         this.initObj.preStart();
         await Model.startDatabaseConnection();
         this.server = http.createServer(this.handleHttpRequest);
-        this.server.listen(this.port, "localhost", () => this.initObj.postStart(this.port));
-
+        this.server.listen(this.port, "localhost", () =>
+            this.initObj.postStart(this.port)
+        );
     }
 
     private importController(controller: string): Promise<Controller> {
@@ -86,12 +85,10 @@ export default class Core {
                     action = this.initObj.noPageFound;
                 }
             } catch (error) {
-
                 if (error == "404") {
                     controller = this.initObj;
                     action = this.initObj.noPageFound;
-                }
-                else {
+                } else {
                     console.log(error);
                     return;
                 }

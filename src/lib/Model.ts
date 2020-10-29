@@ -9,6 +9,7 @@ export abstract class Model {
 
     protected newlyCreated: boolean = true;
 
+    private originalData: object = {};
     constructor() {
         this.tableColumns = Object.getPrototypeOf(this).tableColumns;
     }
@@ -35,7 +36,18 @@ export abstract class Model {
         if (this.newlyCreated) {
             return this.insertOne();
         }
-        const query = `UPDATE ${this.tableName} `;
+        const changedColumns = [];
+        const changedValues = [];
+
+        for (let key in this.originalData) {
+            if (this[key] !== this.originalData[key]) {
+                changedColumns.push(key + "=?");
+                changedValues.push(this[key]);
+            }
+        }
+        const query = `UPDATE ${this.tableName} SET ${changedColumns.join(
+            ", "
+        )}`;
     }
 
     private async insertOne(): Promise<mariadb.UpsertResult> {
@@ -53,34 +65,96 @@ export abstract class Model {
         );
         return result;
     }
+    //#region "Fetching rows";
+    /* 
+    ----------------------------------------------------------------------------------
+                            Fetching rows
+    ----------------------------------------------------------------------------------
+    */
 
     /**
      * get
-     * @param {Model} filter - a object with keys and values after what you want to filet, for example {id:32,name:"hugo"} then server will return all rows that fufill this
+     * @param {Model} filter - An object of the model you want to return with the properties you want to filter after, for example if you want a user with the id=1 and name="hugo" then pass a User object with these properties set pass - new User(1,"hugo")
+     * @returns {Array<T>} - Returns an array of objects that is filles with values from sql query,
+     * @description NOTE: if you only expect one result use getSingleRowByFilter because it will be faster
      */
-    public static getRowByFilter(
-        filter: Model,
-        ModelChild: any
-    ): Promise<Model> {
-        return new Promise<Model>(async (resolve, reject) => {
-            const values = [];
+    public static getManyRowsByFilter<T extends Model>(
+        filter: T
+    ): Promise<Array<T>> {
+        return new Promise<Array<T>>(async (resolve, reject) => {
+            const whereValues = [];
             const filterColumns = [];
             filter.tableColumns.map((e) => {
                 if (filter[e]) {
-                    values.push(filter[e]);
+                    whereValues.push(filter[e]);
                     filterColumns.push(`${e}=?`);
                 }
             });
-            console.log(filterColumns);
-            // Will find a row dependent on the filter
+
             const query = `SELECT * FROM  ${
                 filter.tableName
             } WHERE ${filterColumns.join(",")}`;
 
-            const queryResult = await Model.dbConnection.query(query, values);
+            const queryResult = await Model.dbConnection.query(
+                query,
+                whereValues
+            );
+            const filterClass = Object.getPrototypeOf(filter).constructor;
+            const returnArray: Array<T> = [];
+            queryResult.map((value) => {
+                const tempModel: T = new filterClass();
+                for (let key in value) {
+                    tempModel[key] = value[key];
+                }
+                tempModel.newlyCreated = false;
+                tempModel.originalData = value;
+                returnArray.push(tempModel);
+            });
+            //console.log(returnArray);
+            resolve(returnArray);
         });
     }
+    /**
+     * @param {Model} filter - An object of the model you want to return with the properties you want to filter after, for example if you want a user with the id=1 and name="hugo" then pass a User object with these properties set pass - new User(1,"hugo")
+     * @returns {Array<T>} - Returns a signle object of type T
+     */
+    public static getSingleRowByFilter<T extends Model>(filter: T): Promise<T> {
+        return new Promise<T>(async (resolve, reject) => {
+            const whereValues = [];
+            const filterColumns = [];
+            filter.tableColumns.map((e) => {
+                if (filter[e]) {
+                    whereValues.push(filter[e]);
+                    filterColumns.push(`${e}=?`);
+                }
+            });
 
+            const query = `SELECT * FROM  ${
+                filter.tableName
+            } WHERE ${filterColumns.join(",")} LIMIT 1`;
+
+            const queryResult = await Model.dbConnection.query(
+                query,
+                whereValues
+            );
+
+            const filterClass = Object.getPrototypeOf(filter).constructor;
+            if (!queryResult.length) {
+                return new filterClass();
+            }
+
+            const tempModel: T = new filterClass();
+            for (let key in queryResult[0]) {
+                tempModel[key] = queryResult[0][key];
+            }
+            tempModel.newlyCreated = false;
+            tempModel.originalData = queryResult[0];
+
+            //console.log(returnArray);
+            resolve(tempModel);
+        });
+    }
+    //#endregion "fetching rows"
     /* 
     ----------------------------------------------------------------------------------
                             RELATIONSHIPS
@@ -138,4 +212,8 @@ export function column(target: any, propertyKey: string) {
     //target.tableColumns.push(propertyKey);
     if (!target.tableColumns) target.tableColumns = [];
     target.tableColumns.push(propertyKey);
+}
+
+export function primaryKey(target: any, propertyKey: string) {
+    if (!target.primaryKeys) target.primaryKeys = [];
 }

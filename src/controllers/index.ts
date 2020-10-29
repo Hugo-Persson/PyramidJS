@@ -20,9 +20,13 @@ export default class Index extends Controller {
         this.res.send("Create a new user here");
     }
     public async getUserByFilter(): Promise<void> {
-        const user = new Users(1);
-
-        console.log(await Users.getRowByFilter(user, Users));
+        const user = new Users(undefined, "Hugo");
+        const result: Array<Users> = await Users.getManyRowsByFilter<Users>(
+            user
+        );
+        console.log(result);
+        const result2: Users = await Users.getSingleRowByFilter(user);
+        console.log("RESULT 2", result2);
     }
     public getUserFile(): void {
         this.res.download(process.cwd() + "/resources/index.html");

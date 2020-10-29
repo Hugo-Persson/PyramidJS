@@ -10,8 +10,8 @@ class Start extends Initialize {
 
         this.core = new Core(this);
     }
-    postStart() {
-        console.log("Server up and running");
+    postStart(port: number) {
+        console.log("Server up and running on port " + port);
     }
 
     noPageFound() {
