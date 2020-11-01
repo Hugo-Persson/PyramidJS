@@ -6,23 +6,27 @@
 This my take on a Object Oriented MVC NodeJS framework. The framework is built in TypeScript and built for TypeScript. The framework is built with a very controlled structure that is very scalable see more about this in documentation. My goal for the framework is to minimize the amount of dependencies and keep it as close to 0 as I can.
 
 ---
-
 - [Welcome to MyFramework](#welcome-to-myframework)
-  - [Current support](#current-support)
-  - [Get started](#get-started)
-  - [Documentation](#documentation)
-    - [Starting off](#starting-off)
-    - [Index.ts](#indexts)
-      - [Boiler plate code](#boiler-plate-code)
+- [Current support](#current-support)
+- [Get started](#get-started)
+- [Documentation](#documentation)
+  - [Starting off](#starting-off)
+  - [Index.ts](#indexts)
+    - [Boiler plate code](#boiler-plate-code)
       - [Methods](#methods)
     - [Controllers](#controllers)
       - [Boilerplate code](#boilerplate-code)
-    - [Model](#model)
+  - [## Model](#h2-idmodel-532modelh2)
+  - [### Creating your first model](#h3-idcreating-your-first-model-532creating-your-first-modelh3)
+  - [### CRUD](#h3-idcrud-532crudh3)
+      - [CREATE](#create)
+      - [READ](#read)
+      - [UPDATE](#update)
+  - [### Relationships](#h3-idrelationships-532relationshipsh3)
     - [View](#view)
-
-## Current support
+# Current support
 Coming soon...
-## Get started
+# Get started
 First off make sure you got TypeScript installed or install it with
 ```bash
 npm i -g typescript
@@ -49,19 +53,20 @@ Now you should be up and running
 
 
 
-## Documentation
+# Documentation
 
 ---
 Currently project very far from done and only controller support have been implemented but documentation will include more later.
 
-### Starting off
+## Starting off
 All your code will be placed inside the src folder, the Index.ts file is the file you start the project with and contain all global configuration.
 
-### Index.ts
+## Index.ts
 
 ---
+The point of the index.ts is to handle initialization and handle global routes and global configureation.
 
-#### Boiler plate code
+### Boiler plate code
 ```typescript
 import "module-alias/register";
 import Core from "@lib/Core";
@@ -145,9 +150,9 @@ export default class Users extends Controller {
     }
 }
 ```
-### Model
+## Model
 ---
-#### Creating your first model
+### Creating your first model
 ---
 The boilerplate code for a model looks like this
 ```typescript
@@ -171,13 +176,55 @@ export default class Users extends Model {
 }
 
 ```
-When defining a model it's important to define the table columns with the decorator @column which is imported from the model file. You also need to set the primary key decorator which for atleast one column but you can set it for multiple columns. The primary key decorator is imported from the model file and looks like this @primaryKey. 
+When defining a model it's important to define the table columns with the decorator @column which is imported from the model file. You also need to set the primary key decorator which for atleast one column but you can set it for multiple columns. The primary key decorator is imported from the model file and looks like this @primaryKey. The primary key is used when saving and updating the database. 
 
 
-#### CRUD
+### CRUD
 ---
+For all these examples I am gonna use the model shown in the example above
+#### CREATE
+If you wish to create a new model simply create a new object of the the class that extends the Model baseclass and assign properties and then run save. Example below
+```typescript
+const user = new Users(); // User is an class that extends the base class Model
+user.name = "A name" // Setting a property
+await user.save(); // .save() returns a promise
 
-#### Relationships
+// You can assign the property in whatever way you want as long as they are assigned before running .save()
+// Properties not assigned will not be included in the INSERT statement and will default to what is declared in the SQL database
+
+// You can assign the properties in an constructor like this 
+const user = new User(undefined, "A name");
+await user.save();
+```
+#### READ
+When you wanna fetch a row from the database after a filter you do the following.
+```typescript
+// Fetching many rows
+const filter: Users = new Users();
+filter.name = "Hugo";
+const rows: Array<Users> = Users.getManyRowsByFilter<Users>(filter); 
+
+// You should generelly only fetch many if you believe that the result from the databse will otherwise use getSingleRowByFilter becasue it is faster.
+const filter: Users = new Users();
+filter.id = 1; // The id is the primary key so only one row will have that id
+const user: Users = Users.getSingleRowByFilter<Users>(filter); 
+``` 
+#### UPDATE
+To update a row combine read capabilities and save capabilities. 
+
+Example: 
+```typescript
+const filter: Users = new Users();
+filter.id = 1;
+const user: Users = Users.getSingleRowByFilter<Users>(filter); 
+user.name = "John Doe";
+await user.save();
+
+```
+
+
+
+### Relationships
 ---
 
 ### View
