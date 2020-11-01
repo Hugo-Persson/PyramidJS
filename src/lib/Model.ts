@@ -31,9 +31,10 @@ export abstract class Model {
             resolve();
         });
     }
-
+//#region Saving/Inserting
     /**
-     * save
+     * @description - will save current object, if the model is newly created the a new row will be inserted and if row exist in table it will be updated, NOTE:
+     * - NOTE: If you wish to save multiple models use saveMany function
      */
     public async save(): Promise<mariadb.UpsertResult> {
         return new Promise<mariadb.UpsertResult>(async (resolve, reject) => {
@@ -61,7 +62,7 @@ export abstract class Model {
             }
             const query = `UPDATE ${this.tableName} SET ${changedColumns.join(
                 ", "
-            )} WHERE ${whereValues.join(",")}`;
+            )} WHERE ${whereStatement.join(",")}`;
             const result: mariadb.UpsertResult = await Model.dbConnection.query(
                 query,
                 [changedValues, whereValues]
@@ -85,6 +86,7 @@ export abstract class Model {
         );
         return result;
     }
+    //#endregion
     //#region "Fetching rows";
     /* 
     ----------------------------------------------------------------------------------
@@ -175,6 +177,7 @@ export abstract class Model {
         });
     }
     //#endregion "fetching rows"
+   
     /* 
     ----------------------------------------------------------------------------------
                             RELATIONSHIPS
@@ -192,15 +195,16 @@ export abstract class Model {
     protected belongTo() {}
 
     /**
-     * hasMany
      * @param {any} relatedModel - An class that inherits from model class.
      * @param {string} primaryKey - The primary key of this class
      * @param {string} forreignKey - The forreign key of the realted model
      * @returns {Model} - Returns one model that belongs to this class
+     * 
      */
-    protected hasMany(relatedModel: any, primaryKey: string): Model {
+    protected oneToMany(relatedModel: any, primaryKey: string, forreignKey: string): Model {
         console.log(this[primaryKey]);
         return new relatedModel();
+        // For example a user has many cars where a user has no reference to car but car has user_id 
     }
 
     /**
@@ -210,22 +214,30 @@ export abstract class Model {
      * @param {string} forreignKey - The forreign key of the realted model
      * @returns {Model} - Returns one model that belongs to this class
      */
-    protected hasOne(relatedModel: any): Model {
+    protected oneToOne(relatedModel: any): Model {
+        return new relatedModel();
+    }
+    /**
+     * @param {any} relatedModel - An class that inherits from model class.
+     * @param {string} primaryKey - The primary key of this class
+     * @param {string} forreignKey - The forreign key of the realted model
+     * @returns {Model} - Returns one model that belongs to this class
+     */
+    protected manyToOne(relatedModel: any): Model {
         return new relatedModel();
     }
 
-    /* I want syntax like 
-    
-    class Users extends Model{
-        
-        get messages(){
-            this.hasMany(modelclass/"modelname",primaryKey, forreignKey)
-        }
-        
-
+    /**
+     * ---- FAR FROM DONE ------------
+     * @param {any} relatedModel - An class that inherits from model class.
+     * @param {string} primaryKey - The primary key of this class
+     * @param {string} forreignKey - The forreign key of the realted model
+     * @returns {Model} - Returns one model that belongs to this class
+     */
+    protected manyToMany(relatedModel: any): Model {
+        return new relatedModel();
     }
 
-    */
 }
 
 export function column(target: any, propertyKey: string) {

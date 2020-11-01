@@ -146,8 +146,39 @@ export default class Users extends Controller {
 }
 ```
 ### Model
-Not yet implemented
+---
+#### Creating your first model
+---
+The boilerplate code for a model looks like this
+```typescript
+import { Model, column, primaryKey } from "@lib/Model";
+export default class Users extends Model {
+    @column // Sets the id property to a column
+    @primaryKey // Sets this column to a primary key
+    public id: number;
+    @column
+    public name: string;
 
+    tableName = "users"; // IMPORTANT: tablename must be set
+
+    constructor(id?: number, name?: string) {
+        super();
+        this.id = id;
+        this.name = name;
+    }
+
+    
+}
+
+```
+When defining a model it's important to define the table columns with the decorator @column which is imported from the model file. You also need to set the primary key decorator which for atleast one column but you can set it for multiple columns. The primary key decorator is imported from the model file and looks like this @primaryKey. 
+
+
+#### CRUD
+---
+
+#### Relationships
+---
 
 ### View
 
