@@ -34,6 +34,12 @@ export default class Index extends Controller {
     public tryModels(): void {
         //const userInstance = new Users();
     }
+    public async editUser() {
+        const user = new Users(1);
+        const result2: Users = await Users.getSingleRowByFilter(user);
+        result2.name = "Anton";
+        result2.save();
+    }
 }
 function middlewareExample(req: Request, res: Response, next: Function): void {
     console.log("WHOAH I AM A MIDDLEWARE");

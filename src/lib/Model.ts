@@ -1,3 +1,4 @@
+import { rejects } from "assert";
 import { Mode } from "fs";
 import mariadb from "mariadb";
 export abstract class Model {
@@ -6,12 +7,14 @@ export abstract class Model {
 
     protected tableName: string;
     private tableColumns: Array<string>;
+    private primaryKeys: Array<string>;
 
     protected newlyCreated: boolean = true;
 
     private originalData: object = {};
     constructor() {
         this.tableColumns = Object.getPrototypeOf(this).tableColumns;
+        this.primaryKeys = Object.getPrototypeOf(this).primaryKeys;
     }
     public static startDatabaseConnection() {
         return new Promise(async (resolve) => {
@@ -33,21 +36,38 @@ export abstract class Model {
      * save
      */
     public async save(): Promise<mariadb.UpsertResult> {
-        if (this.newlyCreated) {
-            return this.insertOne();
-        }
-        const changedColumns = [];
-        const changedValues = [];
-
-        for (let key in this.originalData) {
-            if (this[key] !== this.originalData[key]) {
-                changedColumns.push(key + "=?");
-                changedValues.push(this[key]);
+        return new Promise<mariadb.UpsertResult>(async (resolve, reject) => {
+            if (this.newlyCreated) {
+                return this.insertOne();
             }
-        }
-        const query = `UPDATE ${this.tableName} SET ${changedColumns.join(
-            ", "
-        )}`;
+            if (!this.primaryKeys) {
+                reject();
+            }
+            const changedColumns = [];
+            const changedValues = [];
+
+            const whereValues = [];
+
+            const whereStatement = this.primaryKeys.map((i) => {
+                whereValues.push(this[i]);
+                return `${i}=?`;
+            });
+
+            for (let key in this.originalData) {
+                if (this[key] !== this.originalData[key]) {
+                    changedColumns.push(key + "=?");
+                    changedValues.push(this[key]);
+                }
+            }
+            const query = `UPDATE ${this.tableName} SET ${changedColumns.join(
+                ", "
+            )} WHERE ${whereValues.join(",")}`;
+            const result: mariadb.UpsertResult = await Model.dbConnection.query(
+                query,
+                [changedValues, whereValues]
+            );
+            resolve(result);
+        });
     }
 
     private async insertOne(): Promise<mariadb.UpsertResult> {
@@ -209,11 +229,11 @@ export abstract class Model {
 }
 
 export function column(target: any, propertyKey: string) {
-    //target.tableColumns.push(propertyKey);
     if (!target.tableColumns) target.tableColumns = [];
     target.tableColumns.push(propertyKey);
 }
 
 export function primaryKey(target: any, propertyKey: string) {
     if (!target.primaryKeys) target.primaryKeys = [];
+    target.primaryKeys.push(propertyKey);
 }
