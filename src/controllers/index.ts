@@ -40,6 +40,14 @@ export default class Index extends Controller {
         result2.name = "Anton";
         result2.save();
     }
+    /**
+     * deleteUser
+     */
+    public async deleteUser() {
+        const filter = new Users(1);
+        const result: Users = await Users.getSingleRowByFilter(filter);
+        await result.delete();
+    }
 }
 function middlewareExample(req: Request, res: Response, next: Function): void {
     console.log("WHOAH I AM A MIDDLEWARE");

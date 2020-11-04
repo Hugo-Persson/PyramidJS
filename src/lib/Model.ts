@@ -191,8 +191,11 @@ export abstract class Model {
                 this.tableName
             } WHERE ${whereStatement.join(" AND ")}`;
             const result = await Model.dbConnection.query(query, whereValues);
+            console.log(result);
+            resolve(result.affectedRows);
         });
     }
+
     //#endregion
 
     /* 
@@ -202,29 +205,22 @@ export abstract class Model {
     */
 
     /**
-     * belongsToMany
-     */
-    protected belongsToMany() {}
-
-    /**
-     * belongTo
-     */
-    protected belongTo() {}
-
-    /**
-     * @param {any} relatedModel - An class that inherits from model class.
+     * @param {T} relatedModel - An class that inherits from model class.
      * @param {string} primaryKey - The primary key of this class
-     * @param {string} forreignKey - The forreign key of the realted model
-     * @returns {Model} - Returns one model that belongs to this class
+     * @param {string} foreignKey - The forreign key of the realted model
+     * @returns {Array<T>} - Returns an array of related model that has the foreign key that matches this primary key
      *
      */
-    protected oneToMany(
-        relatedModel: any,
+    protected oneToMany<T extends Model>(
+        relatedModel: T,
         primaryKey: string,
-        forreignKey: string
-    ): Model {
+        foreignKey: string
+    ): Array<T> {
         console.log(this[primaryKey]);
-        return new relatedModel();
+        const objectConstructor = Object.getPrototypeOf(relatedModel)
+            .constructor;
+
+        return new objectConstructor();
         // For example a user has many cars where a user has no reference to car but car has user_id
     }
 
@@ -232,19 +228,31 @@ export abstract class Model {
      * hasOne
      * @param {any} relatedModel - An class that inherits from model class.
      * @param {string} primaryKey - The primary key of this class
-     * @param {string} forreignKey - The forreign key of the realted model
+     * @param {string} foreignKey - The forreign key of the realted model
      * @returns {Model} - Returns one model that belongs to this class
      */
-    protected oneToOne(relatedModel: any): Model {
-        return new relatedModel();
+    protected oneToOne<T extends Model>(
+        relatedModel: T,
+        primaryKey: string,
+        foreignKey: string
+    ): T {
+        const objectConstructor = Object.getPrototypeOf(relatedModel)
+            .constructor;
+
+        return new objectConstructor();
     }
+
     /**
      * @param {any} relatedModel - An class that inherits from model class.
      * @param {string} primaryKey - The primary key of this class
-     * @param {string} forreignKey - The forreign key of the realted model
+     * @param {string} foreignKey - The forreign key of the realted model
      * @returns {Model} - Returns one model that belongs to this class
      */
-    protected manyToOne(relatedModel: any): Model {
+    protected manyToOne(
+        relatedModel: any,
+        primaryKey: string,
+        foreignKey: string
+    ): Model {
         return new relatedModel();
     }
 

@@ -15,8 +15,4 @@ export default class Users extends Model {
         this.id = id;
         this.name = name;
     }
-
-    public get myCars() {
-        return this.hasMany(Cars, "carId");
-    }
 }
