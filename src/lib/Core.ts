@@ -32,11 +32,10 @@ export default class Core {
     private importController(controller: string): Promise<Controller> {
         return new Promise<Controller>(async (resolve, reject) => {
             try {
-                console.log("start", `../controllers/${controller}`);
-                var importedFile = await import(`../controllers/${controller}`); // eslint-disable-line no-use-before-define
-                console.log(importedFile);
+                var importedFile = await import(
+                    `../controllers/${controller}Controller`
+                ); // eslint-disable-line no-use-before-define
                 var ImportedClass = importedFile.default; // eslint-disable-line no-use-before-define
-                console.log(ImportedClass);
             } catch (error) {
                 if (error.code == "MODULE_NOT_FOUND") reject("404");
                 else reject(error);
