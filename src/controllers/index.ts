@@ -48,6 +48,13 @@ export default class Index extends Controller {
         const result: Users = await Users.getSingleRowByFilter(filter);
         await result.delete();
     }
+    /**
+     * tryRelationShio
+     */
+    public async tryRelationShips() {
+        const user = await Users.getSingleRowByFilter(new Users(2));
+        this.res.send(JSON.stringify(await user.cars));
+    }
 }
 function middlewareExample(req: Request, res: Response, next: Function): void {
     console.log("WHOAH I AM A MIDDLEWARE");

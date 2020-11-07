@@ -1,12 +1,17 @@
-import { column, Model } from "@lib/Model";
+import { column, Model, primaryKey } from "@lib/Model";
 
 export default class Cars extends Model {
+    @primaryKey
     @column
     public id: number;
     @column
     public userId: number;
+    @column
+    public name: string;
 
-    constructor(userId) {
+    protected static tableName = "cars";
+
+    constructor(userId?) {
         super();
         this.userId = userId;
     }

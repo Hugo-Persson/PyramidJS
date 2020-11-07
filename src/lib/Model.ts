@@ -1,11 +1,12 @@
 import { rejects } from "assert";
 import { Mode } from "fs";
 import mariadb from "mariadb";
+import { monitorEventLoopDelay } from "perf_hooks";
 export abstract class Model {
     public static dbConnection: mariadb.PoolConnection;
     public static dbPool: mariadb.Pool;
 
-    protected tableName: string;
+    protected static tableName: string;
     private tableColumns: Array<string>;
     private primaryKeys: Array<string>;
 
@@ -31,44 +32,50 @@ export abstract class Model {
             resolve();
         });
     }
+
+    private get getTableName(): string {
+        return Object.getPrototypeOf(this).constructor.tableName;
+    }
+
     //#region Saving/Inserting
     /**
      * @description - will save current object, if the model is newly created the a new row will be inserted and if row exist in table it will be updated, NOTE:
      * - NOTE: If you wish to save multiple models use saveMany function
      */
     public async save(): Promise<mariadb.UpsertResult> {
-        return new Promise<mariadb.UpsertResult>(async (resolve, reject) => {
-            if (this.newlyCreated) {
-                return this.insertOne();
-            }
-            if (!this.primaryKeys) {
-                reject();
-            }
-            const changedColumns = [];
-            const changedValues = [];
+        console.log("SAVING STARTED");
+        if (this.newlyCreated) {
+            return this.insertOne();
+        }
+        if (!this.primaryKeys) {
+            throw "ERROR: no primary key";
+        }
+        const changedColumns = [];
+        const changedValues = [];
 
-            const whereValues = [];
+        const whereValues = [];
 
-            const whereStatement = this.primaryKeys.map((i) => {
-                whereValues.push(this[i]);
-                return `${i}=?`;
-            });
-
-            for (let key in this.originalData) {
-                if (this[key] !== this.originalData[key]) {
-                    changedColumns.push(key + "=?");
-                    changedValues.push(this[key]);
-                }
-            }
-            const query = `UPDATE ${this.tableName} SET ${changedColumns.join(
-                ", "
-            )} WHERE ${whereStatement.join(" AND ")}`;
-            const result: mariadb.UpsertResult = await Model.dbConnection.query(
-                query,
-                [changedValues, whereValues]
-            );
-            resolve(result);
+        const whereStatement = this.primaryKeys.map((i) => {
+            whereValues.push(this[i]);
+            return `${i}=?`;
         });
+
+        for (let key in this.originalData) {
+            if (this[key] !== this.originalData[key]) {
+                changedColumns.push(key + "=?");
+                changedValues.push(this[key]);
+            }
+        }
+
+        const query = `UPDATE ${this.getTableName} SET ${changedColumns.join(
+            ", "
+        )} WHERE ${whereStatement.join(" AND ")}`;
+        console.log("QUERY", query);
+        const result: mariadb.UpsertResult = await Model.dbConnection.query(
+            query,
+            [changedValues, whereValues]
+        );
+        return result;
     }
 
     private async insertOne(): Promise<mariadb.UpsertResult> {
@@ -77,7 +84,7 @@ export abstract class Model {
         );
         const values = columns.map((i) => this[i]);
         const questionMarks = values.map(() => "?").join(",");
-        let queryString = `INSERT INTO ${this.tableName} (${columns.join(
+        let queryString = `INSERT INTO ${this.getTableName} (${columns.join(
             ", "
         )}) VALUES (${questionMarks})`;
         const result: mariadb.UpsertResult = await Model.dbConnection.query(
@@ -100,41 +107,36 @@ export abstract class Model {
      * @returns {Array<T>} - Returns an array of objects that is filles with values from sql query,
      * @description NOTE: if you only expect one result use getSingleRowByFilter because it will be faster
      */
-    public static getManyRowsByFilter<T extends Model>(
+    public static async getManyRowsByFilter<T extends Model>(
         filter: T
     ): Promise<Array<T>> {
-        return new Promise<Array<T>>(async (resolve, reject) => {
-            const whereValues = [];
-            const filterColumns = [];
-            filter.tableColumns.map((e) => {
-                if (filter[e]) {
-                    whereValues.push(filter[e]);
-                    filterColumns.push(`${e}=?`);
-                }
-            });
-
-            const query = `SELECT * FROM  ${
-                filter.tableName
-            } WHERE ${filterColumns.join(",")}`;
-
-            const queryResult = await Model.dbConnection.query(
-                query,
-                whereValues
-            );
-            const filterClass = Object.getPrototypeOf(filter).constructor;
-            const returnArray: Array<T> = [];
-            queryResult.map((value) => {
-                const tempModel: T = new filterClass();
-                for (let key in value) {
-                    tempModel[key] = value[key];
-                }
-                tempModel.newlyCreated = false;
-                tempModel.originalData = value;
-                returnArray.push(tempModel);
-            });
-            //console.log(returnArray);
-            resolve(returnArray);
+        const whereValues = [];
+        const filterColumns = [];
+        filter.tableColumns.map((e) => {
+            if (filter[e]) {
+                whereValues.push(filter[e]);
+                filterColumns.push(`${e}=?`);
+            }
         });
+
+        const query = `SELECT * FROM  ${
+            this.tableName
+        } WHERE ${filterColumns.join(",")}`;
+
+        const queryResult = await Model.dbConnection.query(query, whereValues);
+        const filterClass = Object.getPrototypeOf(filter).constructor;
+        const returnArray: Array<T> = [];
+        queryResult.map((value) => {
+            const tempModel: T = new filterClass();
+            for (let key in value) {
+                tempModel[key] = value[key];
+            }
+            tempModel.newlyCreated = false;
+            tempModel.originalData = value;
+            returnArray.push(tempModel);
+        });
+        //console.log(returnArray);
+        return returnArray;
     }
     /**
      * @param {Model} filter - An object of the model you want to return with the properties you want to filter after, for example if you want a user with the id=1 and name="hugo" then pass a User object with these properties set pass - new User(1,"hugo")
@@ -152,7 +154,7 @@ export abstract class Model {
             });
 
             const query = `SELECT * FROM  ${
-                filter.tableName
+                filter.getTableName
             } WHERE ${filterColumns.join(",")} LIMIT 1`;
 
             const queryResult = await Model.dbConnection.query(
@@ -188,7 +190,7 @@ export abstract class Model {
             });
 
             const query = `DELETE FROM ${
-                this.tableName
+                this.getTableName
             } WHERE ${whereStatement.join(" AND ")}`;
             const result = await Model.dbConnection.query(query, whereValues);
             console.log(result);
@@ -211,16 +213,26 @@ export abstract class Model {
      * @returns {Array<T>} - Returns an array of related model that has the foreign key that matches this primary key
      *
      */
-    protected oneToMany<T extends Model>(
-        relatedModel: T,
+    protected async oneToMany<T extends Model>(
+        relatedModel: new () => T,
         primaryKey: string,
         foreignKey: string
-    ): Array<T> {
-        console.log(this[primaryKey]);
-        const objectConstructor = Object.getPrototypeOf(relatedModel)
-            .constructor;
+    ): Promise<Array<T>> {
+        console.log(relatedModel["tableName"]);
 
-        return new objectConstructor();
+        const queryString: string = `SELECT * FROM ${relatedModel["tableName"]} WHERE ${foreignKey}=?`;
+        const queryResult: Array<Object> = await Model.dbConnection.query(
+            queryString,
+            this[primaryKey]
+        );
+        return queryResult.map((value) => {
+            const obj: T = new relatedModel();
+            for (const key in value) {
+                obj[key] = value[key];
+            }
+            return obj;
+        });
+
         // For example a user has many cars where a user has no reference to car but car has user_id
     }
 

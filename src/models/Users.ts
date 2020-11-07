@@ -7,12 +7,16 @@ export default class Users extends Model {
     @column
     public name: string;
 
-    tableName = "users";
+    protected static tableName = "users";
 
     constructor(id?: number, name?: string) {
         super();
 
         this.id = id;
         this.name = name;
+    }
+
+    public get cars(): Promise<Array<Cars>> {
+        return this.oneToMany<Cars>(Cars, "id", "userId");
     }
 }
