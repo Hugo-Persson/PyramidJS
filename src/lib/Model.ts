@@ -209,7 +209,7 @@ export abstract class Model {
     /**
      * @param {T} relatedModel - An class that inherits from model class.
      * @param {string} primaryKey - The primary key of this class
-     * @param {string} foreignKey - The forreign key of the realted model
+     * @param {string} foreignKey - The foreign key of the related model
      * @returns {Array<T>} - Returns an array of related model that has the foreign key that matches this primary key
      *
      */
@@ -243,29 +243,25 @@ export abstract class Model {
      * @param {string} foreignKey - The forreign key of the realted model
      * @returns {Model} - Returns one model that belongs to this class
      */
-    protected oneToOne<T extends Model>(
-        relatedModel: T,
+    protected async oneToOne<T extends Model>(
+        relatedModel: new () => T,
         primaryKey: string,
         foreignKey: string
-    ): T {
-        const objectConstructor = Object.getPrototypeOf(relatedModel)
-            .constructor;
-
-        return new objectConstructor();
-    }
-
-    /**
-     * @param {any} relatedModel - An class that inherits from model class.
-     * @param {string} primaryKey - The primary key of this class
-     * @param {string} foreignKey - The forreign key of the realted model
-     * @returns {Model} - Returns one model that belongs to this class
-     */
-    protected manyToOne(
-        relatedModel: any,
-        primaryKey: string,
-        foreignKey: string
-    ): Model {
-        return new relatedModel();
+    ): Promise<T> {
+        const query = `SELECT * FROM ${relatedModel["tableName"]} WHERE ${foreignKey} = ? LIMIT 1`;
+        const result: Array<object> = await Model.dbConnection.query(
+            query,
+            this[primaryKey]
+        );
+        if (!result.length) {
+            return undefined;
+        } else {
+            const returnObject = new relatedModel();
+            for (const key in result[0]) {
+                returnObject[key] = result[0][key];
+            }
+            return returnObject;
+        }
     }
 
     /**
@@ -275,7 +271,7 @@ export abstract class Model {
      * @param {string} forreignKey - The forreign key of the realted model
      * @returns {Model} - Returns one model that belongs to this class
      */
-    protected manyToMany(relatedModel: any): Model {
+    protected manyToMany<T extends Model>(relatedModel: new () => T): Model {
         return new relatedModel();
     }
 }
