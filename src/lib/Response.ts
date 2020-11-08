@@ -2,6 +2,7 @@ import http from "http";
 import path from "path";
 import fs, { ReadStream } from "fs";
 import mime from "mime-types";
+import View from "./View";
 
 export default class Response {
     private res: http.ServerResponse;
@@ -71,5 +72,9 @@ export default class Response {
             "Content-Type": "application/json",
         });
         this.send(JSON.stringify(data));
+    }
+    render(view: View) {
+        this.res.writeHead(200, { "Content-Type": "text/html" });
+        this.send(view.render());
     }
 }

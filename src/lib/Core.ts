@@ -35,6 +35,7 @@ export default class Core {
                 var importedFile = await import(
                     `../controllers/${controller}Controller`
                 ); // eslint-disable-line no-use-before-define
+
                 var ImportedClass = importedFile.default; // eslint-disable-line no-use-before-define
             } catch (error) {
                 if (error.code == "MODULE_NOT_FOUND") reject("404");
