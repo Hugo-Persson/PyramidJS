@@ -38,7 +38,6 @@
     "mariadb": "^2.5.1",
     "mime-types": "^2.1.27",
     "module-alias": "^2.2.2",
-    "mysql": "^2.18.1",
     "pug": "^3.0.0"
   },
   "_moduleAliases": {
