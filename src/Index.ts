@@ -8,7 +8,7 @@ class Start extends Initialize {
     constructor() {
         super();
 
-        this.core = new Core(this);
+        this.core = new Core(this, true);
     }
     postStart(port: number) {
         console.log("Server up and running on port " + port);

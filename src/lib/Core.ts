@@ -1,14 +1,17 @@
 require("dotenv").config();
 import http from "http";
+import fs from "fs/promises";
 // ---------------------------------- //
 import Controller from "@lib/Controller";
 import Initialize from "@lib/Initialize";
 import Request from "@lib/Request";
 import Response from "@lib/Response";
 import { Model } from "@lib/Model";
+import { runInThisContext } from "vm";
 
 export default class Core {
     private port: number = parseInt(process.env.PORT) || 3000;
+    private userEnabledStaticFiles;
 
     private server: http.Server;
     private initObj: Initialize;
@@ -16,7 +19,8 @@ export default class Core {
      * @param {Initialize} init - Your init object
      *
      */
-    constructor(init: Initialize) {
+    constructor(init: Initialize, enableStaticFiles = false) {
+        this.userEnabledStaticFiles = enableStaticFiles;
         this.initObj = init;
         this.startServer();
     }
@@ -62,7 +66,7 @@ export default class Core {
         res: http.ServerResponse
     ): Promise<void> => {
         const chunks: Array<string> = req.url.split("/");
-
+        if (await this.getStaticFile(req, res)) return;
         chunks.shift(); // Remove empty element in the start
         let controller: Controller | Initialize;
         let action: Function;
@@ -101,4 +105,30 @@ export default class Core {
         if (!controller.res.sendingFile) controller.res.end();
         console.log("ended");
     };
+
+    private async getStaticFile(
+        req: http.IncomingMessage,
+        res: http.ServerResponse
+    ): Promise<boolean> {
+        if (this.userEnabledStaticFiles) {
+            try {
+                const stat = await fs.lstat(
+                    process.cwd() + "/public" + req.url
+                );
+
+                if (stat.isFile()) {
+                    console.log("suc");
+                    const responseObj = new Response(res);
+                    responseObj.sendFile(process.cwd() + "/public/" + req.url);
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (error) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 }
