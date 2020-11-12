@@ -8,4 +8,8 @@ export default class Dashboard extends Controller {
     public tryViews() {
         this.res.render(new IndexView("Jesus"));
     }
+    public tryCookies() {
+        console.log(this.req.cookies);
+        this.res.send("hEllo");
+    }
 }

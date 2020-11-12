@@ -33,8 +33,10 @@
     "typescript": "^3.3.3"
   },
   "dependencies": {
+    "@types/jsonwebtoken": "^8.5.0",
     "@types/mysql": "^2.15.15",
     "dotenv": "^8.2.0",
+    "jsonwebtoken": "^8.5.1",
     "mariadb": "^2.5.1",
     "mime-types": "^2.1.27",
     "module-alias": "^2.2.2",

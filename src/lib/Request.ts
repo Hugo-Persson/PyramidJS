@@ -5,6 +5,7 @@ export default class Request {
     private req: http.IncomingMessage;
     private queryStringsSave: object;
     private privateParam: object = {};
+    private parsedCookies: object = {};
     constructor(req: http.IncomingMessage) {
         this.req = req;
         this.queryStringsSave = querystring.parse(req.url);
@@ -16,6 +17,21 @@ export default class Request {
                 this.privateParam[element] = pathSegments[index + 1];
             }
         }
+        this.parsedCookies = this.parseCookies();
+    }
+    private parseCookies(): object {
+        
+        if (!this.req.headers.cookie) {
+            return {};
+        }
+        const chunks = this.req.headers.cookie.split(";");
+        const result = {};
+        chunks.map((value) => {
+            const pairs = value.split("=");
+            if (pairs.length != 2) return;
+            result[pairs[0].trim()] = pairs[1];
+        });
+        return result;
     }
 
     public get queryStrings(): object {
@@ -23,5 +39,8 @@ export default class Request {
     }
     public get params(): object {
         return this.privateParam;
+    }
+    public get cookies(): object {
+        return this.parsedCookies;
     }
 }
