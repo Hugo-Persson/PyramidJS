@@ -43,7 +43,6 @@ export abstract class Model {
      * - NOTE: If you wish to save multiple models use saveMany function
      */
     public async save(): Promise<mariadb.UpsertResult> {
-        console.log("SAVING STARTED");
         if (this.newlyCreated) {
             return this.insertOne();
         }
@@ -70,7 +69,6 @@ export abstract class Model {
         const query = `UPDATE ${this.getTableName} SET ${changedColumns.join(
             ", "
         )} WHERE ${whereStatement.join(" AND ")}`;
-        console.log("QUERY", query);
         const result: mariadb.UpsertResult = await Model.dbConnection.query(
             query,
             [changedValues, whereValues]
@@ -135,7 +133,6 @@ export abstract class Model {
             tempModel.originalData = value;
             returnArray.push(tempModel);
         });
-        //console.log(returnArray);
         return returnArray;
     }
     /**
@@ -174,7 +171,6 @@ export abstract class Model {
             tempModel.newlyCreated = false;
             tempModel.originalData = queryResult[0];
 
-            //console.log(returnArray);
             resolve(tempModel);
         });
     }
@@ -193,7 +189,6 @@ export abstract class Model {
                 this.getTableName
             } WHERE ${whereStatement.join(" AND ")}`;
             const result = await Model.dbConnection.query(query, whereValues);
-            console.log(result);
             resolve(result.affectedRows);
         });
     }
@@ -218,8 +213,6 @@ export abstract class Model {
         primaryKey: string,
         foreignKey: string
     ): Promise<Array<T>> {
-        console.log(relatedModel["tableName"]);
-
         const queryString: string = `SELECT * FROM ${relatedModel["tableName"]} WHERE ${foreignKey}=?`;
         const queryResult: Array<Object> = await Model.dbConnection.query(
             queryString,

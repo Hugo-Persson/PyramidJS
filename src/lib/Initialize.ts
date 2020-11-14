@@ -1,10 +1,8 @@
 import Request from "@lib/Request";
 import Response from "@lib/Response";
+import Controller from "./Controller";
 
-export default abstract class Initialize {
-    req: Request;
-    res: Response;
-
+export default abstract class Initialize extends Controller {
     preStart(): void {
         return;
     }
@@ -15,7 +13,7 @@ export default abstract class Initialize {
      * @description For 404 requests, do not call it instead use res.throw404()
      *
      */
-    abstract noPageFound(): void;
+    abstract async noPageFound(): Promise<void>;
 
     /**
      * @description When the user want to reach the path "/"

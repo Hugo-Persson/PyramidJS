@@ -1,6 +1,7 @@
 import "module-alias/register";
 import Core from "@lib/Core";
 import Initialize from "@lib/Initialize";
+import { GET } from "@lib/Controller";
 
 class Start extends Initialize {
     core: Core;
@@ -13,8 +14,8 @@ class Start extends Initialize {
     postStart(port: number) {
         console.log("Server up and running on port " + port);
     }
-
-    noPageFound() {
+    async noPageFound() {
+        console.log(super.req);
         this.res.send("404 and heartbreak");
     }
     indexAction() {

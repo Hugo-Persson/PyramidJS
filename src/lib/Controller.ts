@@ -109,9 +109,79 @@ export default class Controller {
             return secret;
         }
     }
+
+    public async runAction(name: string, method: ActionType): Promise<boolean> {
+        let action: Function;
+
+        if (method == ActionType.POST) {
+            action = Object.getPrototypeOf(this).postActions
+                ? Object.getPrototypeOf(this).postActions[name]
+                : undefined;
+        } else if (method == ActionType.GET) {
+            action = Object.getPrototypeOf(this).getActions
+                ? Object.getPrototypeOf(this).getActions[name]
+                : undefined;
+        } else if (method == ActionType.DELETE) {
+            action = Object.getPrototypeOf(this).deleteActions
+                ? Object.getPrototypeOf(this).deleteActions[name]
+                : undefined;
+        } else if (method == ActionType.PUT) {
+            action = Object.getPrototypeOf(this).putActions
+                ? Object.getPrototypeOf(this).putActions[name]
+                : undefined;
+        } else {
+            console.log("No method provided");
+            return true;
+        }
+        if (action) {
+            await action.bind(this)(); // I use bind because I want this to be tied to this object not this function, it gets a bit buggy when I run the code like this
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 enum TokenAssignmentMethod {
     renew = 0,
     append = 1,
     overwrite = 2,
+}
+export enum ActionType {
+    GET,
+    POST,
+    PUT,
+    DELETE,
+}
+
+export function GET(
+    target: any,
+    propertyKey: string,
+    description: PropertyDescriptor
+) {
+    if (!target.getActions) target.getActions = {};
+    target.getActions[propertyKey] = target[propertyKey];
+}
+export function POST(
+    target: any,
+    propertyKey: string,
+    description: PropertyDescriptor
+) {
+    if (!target.postActions) target.postActions = {};
+    target.postActions[propertyKey] = target[propertyKey];
+}
+export function DELETE(
+    target: any,
+    propertyKey: string,
+    description: PropertyDescriptor
+) {
+    if (!target.deleteActions) target.deleteActions = {};
+    target.deleteActions = target[propertyKey];
+}
+export function PUT(
+    target: any,
+    propertyKey: string,
+    description: PropertyDescriptor
+) {
+    if (!target.putActions) target.putActions = {};
+    target.putActions = target[propertyKey];
 }

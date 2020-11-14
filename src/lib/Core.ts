@@ -2,7 +2,7 @@ require("dotenv").config();
 import http from "http";
 import fs from "fs/promises";
 // ---------------------------------- //
-import Controller from "@lib/Controller";
+import Controller, { ActionType } from "@lib/Controller";
 import Initialize from "@lib/Initialize";
 import Request from "@lib/Request";
 import Response from "@lib/Response";
@@ -55,7 +55,6 @@ export default class Core {
                 reject("404");
             }
             const instance = new ImportedClass();
-            console.log(instance);
 
             resolve(instance);
         });
@@ -69,29 +68,23 @@ export default class Core {
         if (await this.getStaticFile(req, res)) return;
         chunks.shift(); // Remove empty element in the start
         let controller: Controller | Initialize;
-        let action: Function;
+        let action: string;
 
         if (chunks[0] == "") {
             // the / route
             controller = this.initObj;
-            action = this.initObj.indexAction;
+            action = "indexAction";
         } else {
             if (chunks.length == 1) {
                 chunks.push("index"); // If they don't specify a action then we default it to an index action
             }
             try {
                 controller = await this.importController(chunks[0]);
-                console.log(controller);
-                if (controller[chunks[1]]) {
-                    action = controller[chunks[1]];
-                } else {
-                    controller = this.initObj;
-                    action = this.initObj.noPageFound;
-                }
+                action = chunks[1];
             } catch (error) {
                 if (error == "404") {
                     controller = this.initObj;
-                    action = this.initObj.noPageFound;
+                    action = "noPageFound";
                 } else {
                     console.log(error);
                     return;
@@ -101,7 +94,14 @@ export default class Core {
 
         controller.req = new Request(req);
         controller.res = new Response(res);
-        await action.bind(controller)(); // I don't want to force the user to declare arrow functions for every function so instead I overwrite the this and now they can write this.req
+        if (
+            action == "noPageFound" ||
+            !(await controller.runAction(action, ActionType[req.method]))
+        ) {
+            this.initObj.req = controller.req;
+            this.initObj.res = controller.res;
+            await this.initObj.noPageFound();
+        }
         if (!controller.res.sendingFile) controller.res.end();
         console.log("ended");
     };
@@ -117,7 +117,6 @@ export default class Core {
                 );
 
                 if (stat.isFile()) {
-                    console.log("suc");
                     const responseObj = new Response(res);
                     responseObj.sendFile(process.cwd() + "/public/" + req.url);
                     return true;
