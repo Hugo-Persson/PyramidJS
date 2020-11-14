@@ -1,13 +1,13 @@
 require("dotenv").config();
 import http from "http";
 import fs from "fs/promises";
+import formidable from "formidable";
 // ---------------------------------- //
 import Controller, { ActionType } from "@lib/Controller";
 import Initialize from "@lib/Initialize";
 import Request from "@lib/Request";
 import Response from "@lib/Response";
 import { Model } from "@lib/Model";
-import { runInThisContext } from "vm";
 
 export default class Core {
     private port: number = parseInt(process.env.PORT) || 3000;
@@ -92,8 +92,11 @@ export default class Core {
             }
         }
 
-        controller.req = new Request(req);
-        controller.res = new Response(res);
+        const parsedReq = new Request(req, await this.parseBody(req));
+        const parsedRes = new Response(res);
+
+        controller.req = parsedReq;
+        controller.res = parsedRes;
         if (
             action == "noPageFound" ||
             !(await controller.runAction(action, ActionType[req.method]))
@@ -129,5 +132,19 @@ export default class Core {
         } else {
             return false;
         }
+    }
+    private async parseBody(req: http.IncomingMessage): Promise<object> {
+        return new Promise<object>((resolve, reject) => {
+            if (req.headers["content-type"] !== "application/json") {
+                resolve({});
+                return;
+            }
+            const body = [];
+            req.on("data", (chunk) => {
+                body.push(chunk);
+            }).on("end", () => {
+                resolve(JSON.parse(Buffer.concat(body).toString()));
+            });
+        });
     }
 }

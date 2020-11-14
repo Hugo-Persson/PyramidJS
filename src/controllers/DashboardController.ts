@@ -24,4 +24,8 @@ export default class Dashboard extends Controller {
     public async testGettingTokenData() {
         this.res.json(await this.getTokenData("test"));
     }
+    @POST
+    public tryPostBody() {
+        this.res.json(this.req.body);
+    }
 }

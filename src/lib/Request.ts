@@ -6,7 +6,8 @@ export default class Request {
     private queryStringsSave: object;
     private privateParam: object = {};
     private parsedCookies: object = {};
-    constructor(req: http.IncomingMessage) {
+    readonly body: object = {};
+    constructor(req: http.IncomingMessage, body: object) {
         this.req = req;
         this.queryStringsSave = querystring.parse(req.url);
 
@@ -18,9 +19,10 @@ export default class Request {
             }
         }
         this.parsedCookies = this.parseCookies();
+        this.body = body;
     }
+
     private parseCookies(): object {
-        
         if (!this.req.headers.cookie) {
             return {};
         }
