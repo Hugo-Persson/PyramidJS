@@ -91,7 +91,7 @@ export default class Controller {
             }
         }
     }
-    private createToken(data: string | object, expiration: number) {
+    private createToken(data: string | object, expiration?: number) {
         return new Promise((resolve, reject) => {
             if (expiration) data["exp"] = expiration;
             jwt.sign(data, this.getSecret(), (err, token) => {

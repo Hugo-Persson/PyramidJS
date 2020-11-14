@@ -77,5 +77,7 @@ export default class Response {
         this.res.writeHead(200, { "Content-Type": "text/html" });
         this.send(view.render());
     }
-    setCookie(key, value) {}
+    setCookie(key, value) {
+        this.res.setHeader("Set-Cookie", key + "=" + value);
+    }
 }
