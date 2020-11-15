@@ -7,6 +7,10 @@ export default class Controller {
     req: Request;
     res: Response;
 
+    /**
+     * Will try to get the data for a token, will be rejected if the data can not be verified
+     * @param name The name of the token, the name of the cookie that is stored
+     */
     public async getTokenData(name: string): Promise<Object> {
         console.log(name, "   ", this.req.cookies);
         if (this.req.cookies[name]) {
@@ -34,7 +38,7 @@ export default class Controller {
      */
     public async setTokenData(
         name: string,
-        value: Object,
+        value: object,
         assignmentMethod: TokenAssignmentMethod = TokenAssignmentMethod.renew,
         expiration?: number
     ) {
@@ -115,7 +119,10 @@ export default class Controller {
             }
         }
     }
-    private createToken(data: string | object, expiration?: number) {
+    private createToken(
+        data: string | object,
+        expiration?: number
+    ): Promise<string> {
         return new Promise((resolve, reject) => {
             if (expiration) data["exp"] = expiration;
             jwt.sign(data, this.getSecret(), (err, token) => {
@@ -134,6 +141,11 @@ export default class Controller {
         }
     }
 
+    /**
+     * Is used to run an action in a controller, this should only be called by the core
+     * @param name The name of the action you want to run
+     * @param method What type of http request is sent
+     */
     public async runAction(name: string, method: ActionType): Promise<boolean> {
         let action: Function;
 
@@ -165,6 +177,7 @@ export default class Controller {
         }
     }
 }
+
 export enum TokenAssignmentMethod {
     renew = 0,
     append = 1,

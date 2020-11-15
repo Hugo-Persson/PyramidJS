@@ -67,17 +67,33 @@ export default class Response {
     end(): void {
         this.res.end();
     }
+    /**
+     * Will send a object as JSON to the client - no other data can be sent after this
+     * @param data A object that will be converted to JSON and sent to the client with json content type
+     */
     json(data: object): void {
         this.res.writeHead(200, {
             "Content-Type": "application/json",
         });
         this.send(JSON.stringify(data));
     }
+    /**
+     * Will render a view object and send the rendered content to the client data should already have been passed to the object
+     * @param view An instance of the view object you want to render
+     */
     render(view: View) {
         this.res.writeHead(200, { "Content-Type": "text/html" });
         this.send(view.render());
     }
-    setCookie(key, value, options?: CookieOptions) {
+
+    /**
+     *
+     * @param key The key for the cookie, will be used whenever you want to access your cookie -- NOTE: Formatting is important no spaces are allowed
+     * @param value The value that will be kept for the cookie
+     * @param options Different options how the cookie will be stored, currently only path is supported
+     */
+    setCookie(key: string, value: string, options?: CookieOptions) {
+        // TODO: Remove whitespace from key
         let cookieData = key + "=" + value;
         if (options) {
             if (options.path) {
