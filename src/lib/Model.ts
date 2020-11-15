@@ -3,8 +3,8 @@ import { Mode } from "fs";
 import mariadb from "mariadb";
 import { monitorEventLoopDelay } from "perf_hooks";
 export abstract class Model {
-    public static dbConnection: mariadb.PoolConnection;
-    public static dbPool: mariadb.Pool;
+    private static dbConnection: mariadb.PoolConnection;
+    private static dbPool: mariadb.Pool;
 
     protected static tableName: string;
     private tableColumns: Array<string>;
@@ -141,6 +141,7 @@ export abstract class Model {
      */
     public static getSingleRowByFilter<T extends Model>(filter: T): Promise<T> {
         return new Promise<T>(async (resolve, reject) => {
+            console.log("CALLED");
             const whereValues = [];
             const filterColumns = [];
             filter.tableColumns.map((e) => {
@@ -161,7 +162,8 @@ export abstract class Model {
 
             const filterClass = Object.getPrototypeOf(filter).constructor;
             if (!queryResult.length) {
-                return new filterClass();
+                const newObject = new filterClass();
+                resolve(newObject);
             }
 
             const tempModel: T = new filterClass();

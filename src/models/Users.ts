@@ -5,15 +5,19 @@ export default class Users extends Model {
     @primaryKey
     public id: number;
     @column
-    public name: string;
+    public username: string;
+
+    @column
+    public password: string;
 
     protected static tableName = "users";
 
-    constructor(id?: number, name?: string) {
+    constructor(id?: number, username?: string, password?: string) {
         super();
 
         this.id = id;
-        this.name = name;
+        this.username = username;
+        this.password = password;
     }
 
     public get cars(): Promise<Array<Cars>> {

@@ -77,7 +77,31 @@ export default class Response {
         this.res.writeHead(200, { "Content-Type": "text/html" });
         this.send(view.render());
     }
-    setCookie(key, value) {
-        this.res.setHeader("Set-Cookie", key + "=" + value);
+    setCookie(key, value, options?: CookieOptions) {
+        let cookieData = key + "=" + value;
+        if (options) {
+            if (options.path) {
+                cookieData += ";Path=" + options.path;
+            }
+        }
+        this.res.setHeader("Set-Cookie", cookieData);
     }
+
+    setStatusCode(code: number) {
+        this.res.statusCode = code;
+    }
+}
+
+export interface CookieOptions {
+    maxAge?: number;
+    domain?: string;
+    path?: string;
+    secure?: boolean;
+    httpOnly?: boolean;
+    sameSite?: SameSite;
+}
+enum SameSite {
+    strict = "Strict",
+    lax = "Lax",
+    noen = "None",
 }

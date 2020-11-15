@@ -8,6 +8,7 @@ export default class Controller {
     res: Response;
 
     public async getTokenData(name: string): Promise<Object> {
+        console.log(name, "   ", this.req.cookies);
         if (this.req.cookies[name]) {
             return this.verifyPromiseWrapper(this.req.cookies[name]);
         } else {
@@ -38,7 +39,10 @@ export default class Controller {
         expiration?: number
     ) {
         if (assignmentMethod == TokenAssignmentMethod.overwrite) {
-            this.res.setCookie(name, await this.createToken(value));
+            this.res.setCookie(name, await this.createToken(value), {
+                path: "/",
+                maxAge: expiration,
+            });
         } else if (assignmentMethod == TokenAssignmentMethod.append) {
             const cookie = this.req.cookies[name];
             if (cookie) {
@@ -50,18 +54,30 @@ export default class Controller {
                         await this.createToken(
                             Object.assign(data, value),
                             data["exp"]
-                        )
+                        ),
+                        {
+                            path: "/",
+                            maxAge: expiration,
+                        }
                     );
                 } catch (err) {
                     this.res.setCookie(
                         name,
-                        await this.createToken(value, expiration)
+                        await this.createToken(value, expiration),
+                        {
+                            path: "/",
+                            maxAge: expiration,
+                        }
                     );
                 }
             } else {
                 this.res.setCookie(
                     name,
-                    await this.createToken(value, expiration)
+                    await this.createToken(value, expiration),
+                    {
+                        path: "/",
+                        maxAge: expiration,
+                    }
                 );
             }
         } else {
@@ -80,13 +96,21 @@ export default class Controller {
                 } catch (err) {
                     this.res.setCookie(
                         name,
-                        await this.createToken(value, expiration)
+                        await this.createToken(value, expiration),
+                        {
+                            path: "/",
+                            maxAge: expiration,
+                        }
                     );
                 }
             } else {
                 this.res.setCookie(
                     name,
-                    await this.createToken(value, expiration)
+                    await this.createToken(value, expiration),
+                    {
+                        path: "/",
+                        maxAge: expiration,
+                    }
                 );
             }
         }
@@ -141,7 +165,7 @@ export default class Controller {
         }
     }
 }
-enum TokenAssignmentMethod {
+export enum TokenAssignmentMethod {
     renew = 0,
     append = 1,
     overwrite = 2,

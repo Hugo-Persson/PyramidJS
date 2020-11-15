@@ -33,8 +33,10 @@
     "typescript": "^3.3.3"
   },
   "dependencies": {
+    "@types/bcrypt": "^3.0.0",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/mysql": "^2.15.15",
+    "bcrypt": "^5.0.0",
     "dotenv": "^8.2.0",
     "jsonwebtoken": "^8.5.1",
     "mariadb": "^2.5.1",

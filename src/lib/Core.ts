@@ -1,7 +1,6 @@
 require("dotenv").config();
 import http from "http";
 import fs from "fs/promises";
-import formidable from "formidable";
 // ---------------------------------- //
 import Controller, { ActionType } from "@lib/Controller";
 import Initialize from "@lib/Initialize";

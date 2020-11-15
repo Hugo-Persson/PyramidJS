@@ -10,19 +10,23 @@ export default class Dashboard extends Controller {
     public tryViews() {
         this.res.render(new IndexView("Jesus"));
     }
+    @GET
     public tryCookies() {
+        this.res.setCookie("something", "VALUE");
         this.res.send("hEllo");
     }
+    @GET
     public trySetCookie() {
         this.res.setCookie("aCookiee", "aValue");
     }
+    @GET
     public async tryTokens() {
         await this.setTokenData("test", { name: "Hugo Persson" });
         this.res.send("Token set");
     }
-
+    @GET
     public async testGettingTokenData() {
-        this.res.json(await this.getTokenData("test"));
+        this.res.json(await this.getTokenData("auth"));
     }
     @POST
     public tryPostBody() {
