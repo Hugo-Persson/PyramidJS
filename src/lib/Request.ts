@@ -6,6 +6,9 @@ export default class Request {
     private queryStringsSave: object;
     private privateParam: object = {};
     private parsedCookies: object = {};
+
+    public authed = false;
+
     readonly body: any;
     constructor(req: http.IncomingMessage, body: any) {
         this.req = req;

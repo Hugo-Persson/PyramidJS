@@ -1,6 +1,8 @@
 import Controller, { POST, TokenAssignmentMethod } from "@lib/Controller";
 import Users from "@models/Users";
 import bcrypt from "bcrypt";
+import Request from "@lib/Request";
+import Response from "@lib/Response";
 
 export default class AuthenticationController extends Controller {
     /**
@@ -99,4 +101,11 @@ export default class AuthenticationController extends Controller {
             this.res.setStatusCode(500); // Internal server error
         }
     }
+
+    public static checkAuthentication(req: Request,res: Response,next:Function):void{
+        console.log("WHOAH I AM A MIDDLEWARE");
+        next();
+    }
+    
+
 }

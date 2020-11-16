@@ -1,11 +1,14 @@
 import Controller, { GET, POST } from "@lib/Controller";
 import IndexView from "@views/IndexView";
 import { PassThrough } from "stream";
+import { addMiddleware } from "@lib/Middleware";
+import AuthenticationController from "@controller/AuthenticationController";
 
 export default class Dashboard extends Controller {
     public tryParams() {
         this.res.json(this.req.params);
     }
+    @addMiddleware([AuthenticationController.checkAuthentication])
     @POST
     public tryViews() {
         this.res.render(new IndexView("Jesus"));
