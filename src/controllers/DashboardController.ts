@@ -4,19 +4,22 @@ import { PassThrough } from "stream";
 import { addMiddleware } from "@lib/Middleware";
 import AuthenticationController from "@controller/AuthenticationController";
 
+import Request from "@lib/Request";
+import Response from "@lib/Response";
+
 export default class Dashboard extends Controller {
     public tryParams() {
         this.res.json(this.req.params);
     }
-    @addMiddleware([AuthenticationController.checkAuthentication])
-    @POST
+
+    @addMiddleware([checkAuthentication])
+    @GET
     public tryViews() {
         this.res.render(new IndexView("Jesus"));
     }
     @GET
     public tryCookies() {
-        this.res.setCookie("something", "VALUE");
-        this.res.send("hEllo");
+        this.tryViews();
     }
     @GET
     public trySetCookie() {
@@ -35,4 +38,12 @@ export default class Dashboard extends Controller {
     public tryPostBody() {
         this.res.json(this.req.body);
     }
+}
+export function checkAuthentication(
+    req: Request,
+    res: Response,
+    next: Function
+): void {
+    console.log("WHOAH I AM A MIDDLEWARE");
+    next();
 }

@@ -1,9 +1,11 @@
 import Request from "@lib/Request";
 import Response from "@lib/Response";
+import { ExecOptionsWithBufferEncoding } from "child_process";
 import Controller from "./Controller";
 
 // Method Decorator
 export function addMiddleware(stack: Array<IMiddlewareFunction>) {
+    console.log("Middleware running");
     return function (
         target: Controller,
         key: string | symbol,
@@ -19,7 +21,7 @@ export function addMiddleware(stack: Array<IMiddlewareFunction>) {
 }
 
 function executeMiddlewareStack(
-    stack: Array<IMiddlewareFunction>,
+    stack: Array<Function>,
     res: Response,
     req: Request,
     index: number

@@ -141,36 +141,37 @@ export default class Controller {
         }
     }
 
+    private getAction(arrayName: string, actionName: string): string {
+        if (Object.getPrototypeOf(this)[arrayName]) {
+            return Object.getPrototypeOf(this)[arrayName].includes(actionName)
+                ? actionName
+                : undefined;
+        } else {
+            return undefined;
+        }
+    }
     /**
      * Is used to run an action in a controller, this should only be called by the core
      * @param name The name of the action you want to run
      * @param method What type of http request is sent
      */
     public async runAction(name: string, method: ActionType): Promise<boolean> {
-        let action: Function;
+        let action: string;
 
         if (method == ActionType.POST) {
-            action = Object.getPrototypeOf(this).postActions
-                ? Object.getPrototypeOf(this).postActions[name]
-                : undefined;
+            action = this.getAction("postActions", name);
         } else if (method == ActionType.GET) {
-            action = Object.getPrototypeOf(this).getActions
-                ? Object.getPrototypeOf(this).getActions[name]
-                : undefined;
+            action = this.getAction("getActions", name);
         } else if (method == ActionType.DELETE) {
-            action = Object.getPrototypeOf(this).deleteActions
-                ? Object.getPrototypeOf(this).deleteActions[name]
-                : undefined;
+            action = this.getAction("deleteActions", name);
         } else if (method == ActionType.PUT) {
-            action = Object.getPrototypeOf(this).putActions
-                ? Object.getPrototypeOf(this).putActions[name]
-                : undefined;
+            action = this.getAction("putActions", name);
         } else {
             console.log("No method provided");
             return true;
         }
         if (action) {
-            await action.bind(this)(); // I use bind because I want this to be tied to this object not this function, it gets a bit buggy when I run the code like this
+            await this[action].bind(this)(); // I use bind because I want this to be tied to this object not this function, it gets a bit buggy when I run the code like this
             return true;
         } else {
             return false;
@@ -195,30 +196,30 @@ export function GET(
     propertyKey: string,
     description: PropertyDescriptor
 ) {
-    if (!target.getActions) target.getActions = {};
-    target.getActions[propertyKey] = target[propertyKey];
+    if (!target.getActions) target.getActions = [];
+    target.getActions.push(propertyKey);
 }
 export function POST(
     target: any,
     propertyKey: string,
     description: PropertyDescriptor
 ) {
-    if (!target.postActions) target.postActions = {};
-    target.postActions[propertyKey] = target[propertyKey];
+    if (!target.postActions) target.postActions = [];
+    target.postActions.push(propertyKey);
 }
 export function DELETE(
     target: any,
     propertyKey: string,
     description: PropertyDescriptor
 ) {
-    if (!target.deleteActions) target.deleteActions = {};
-    target.deleteActions = target[propertyKey];
+    if (!target.deleteActions) target.deleteActions = [];
+    target.deleteActions.push(propertyKey);
 }
 export function PUT(
     target: any,
     propertyKey: string,
     description: PropertyDescriptor
 ) {
-    if (!target.putActions) target.putActions = {};
-    target.putActions = target[propertyKey];
+    if (!target.putActions) target.putActions = [];
+    target.putActions.push(propertyKey);
 }
