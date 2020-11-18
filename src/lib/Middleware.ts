@@ -12,26 +12,22 @@ export function addMiddleware(stack: Array<IMiddlewareFunction>) {
         descriptor: PropertyDescriptor
     ) {
         const original = descriptor.value;
-        descriptor.value = function (...args: any[]) {
-            executeMiddlewareStack(stack, target.res, target.req, 0);
+        descriptor.value = async function (...args: any[]) {
+            executeMiddlewareStack(stack, this, 0);
             return original.apply(this, args);
         };
         return descriptor;
     };
 }
 
-function executeMiddlewareStack(
-    stack: Array<Function>,
-    res: Response,
-    req: Request,
+async function executeMiddlewareStack(
+    stack: Array<IMiddlewareFunction>,
+    controller: Controller,
     index: number
 ) {
-    if (index < stack.length)
-        stack[index](req, res, () =>
-            executeMiddlewareStack(stack, res, req, index + 1)
-        );
+    if (index < stack.length) await stack[index](controller);
 }
 
 export interface IMiddlewareFunction {
-    (req: Request, res: Response, next: Function): void;
+    (controller: Controller): Promise<void>;
 }
