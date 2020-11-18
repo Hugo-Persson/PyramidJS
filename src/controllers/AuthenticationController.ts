@@ -101,4 +101,11 @@ export default class AuthenticationController extends Controller {
             this.res.setStatusCode(500); // Internal server error
         }
     }
+    public static checkAuthentication(
+        req: Request,
+        res: Response,
+        next: Function
+    ): void {
+        next();
+    }
 }
