@@ -98,7 +98,10 @@ export default class Core {
         controller.res = parsedRes;
         if (
             action == "noPageFound" ||
-            !(await controller.runAction(action, ActionType[req.method]))
+            !(await controller.runAction(
+                this.parseAction(action),
+                ActionType[req.method]
+            ))
         ) {
             this.initObj.req = controller.req;
             this.initObj.res = controller.res;
@@ -146,7 +149,10 @@ export default class Core {
         });
     }
     private parseAction(action: string) {
-        const temp = action.replace("/(?<=-). /g", (s) => s.toUpperCase());
+        const regex2 = /(?<=-)./g;
+        const temp = action
+            .toLowerCase()
+            .replace(regex2, (s) => s.toUpperCase());
         return temp.replace("-", "");
     }
 }
