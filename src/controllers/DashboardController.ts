@@ -13,14 +13,17 @@ export default class Dashboard extends Controller {
     }
 
     @GET
-    @addMiddleware([
-        AuthenticationController.checkAuthentication,
-        AuthenticationController.secondMiddle,
-    ])
+    @addMiddleware([AuthenticationController.checkAuthentication])
     public async tryViews() {
-        console.log("RUN");
+        console.log(this.authData);
         this.res.render(new IndexView("Jesus"));
     }
+    @GET
+    @addMiddleware([AuthenticationController.checkAuthentication])
+    public amILoggedIn() {
+        this.res.send(this.authData ? "Yes" : "No");
+    }
+
     @GET
     public async tryCookies() {
         await this.tryViews();

@@ -6,12 +6,12 @@ import { exit } from "process";
 export default class Controller {
     req: Request;
     res: Response;
-
+    public authData = undefined;
     /**
      * Will try to get the data for a token, will be rejected if the data can not be verified
      * @param name The name of the token, the name of the cookie that is stored
      */
-    public async getTokenData(name: string): Promise<Object> {
+    public async getTokenData(name: string): Promise<any> {
         console.log(name, "   ", this.req.cookies);
         if (this.req.cookies[name]) {
             return this.verifyPromiseWrapper(this.req.cookies[name]);

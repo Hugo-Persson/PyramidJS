@@ -37,6 +37,7 @@ export default class AuthenticationController extends Controller {
             if (await bcrypt.compare(password, user.password)) {
                 this.res.setStatusCode(200);
                 await this.generateToken({
+                    type: "auth",
                     id: user.id,
                     username: user.username,
                 });
@@ -89,6 +90,7 @@ export default class AuthenticationController extends Controller {
             );
             await newUser.save();
             await this.generateToken({
+                type: "auth",
                 id: newUser.id,
                 username: newUser.username,
             });
@@ -104,11 +106,15 @@ export default class AuthenticationController extends Controller {
     public static async checkAuthentication(
         controller: Controller
     ): Promise<void> {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                console.log("DONE 1");
-                resolve();
-            }, 1000);
-        });
+        try {
+            const data = await controller.getTokenData("auth");
+            if (data.type == "auth") {
+                controller.authData = data;
+            } else {
+                controller.authData = undefined;
+            }
+        } catch (error) {
+            controller.authData = undefined;
+        }
     }
 }
