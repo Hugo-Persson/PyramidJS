@@ -104,21 +104,11 @@ export default class AuthenticationController extends Controller {
     public static async checkAuthentication(
         controller: Controller
     ): Promise<void> {
-        return new Promise(resolve=>{
-            setTimeout(()=>{
+        return new Promise((resolve) => {
+            setTimeout(() => {
                 console.log("DONE 1");
                 resolve();
-            },500);
-        });
-    }
-    public static async secondMiddle(
-        controller: Controller
-    ): Promise<void> {
-        return new Promise(resolve=>{
-            setTimeout(()=>{
-                console.log("DONE 2");
-                resolve();
-            },500);
+            }, 1000);
         });
     }
 }

@@ -12,7 +12,11 @@ export default class Dashboard extends Controller {
         this.res.json(this.req.params);
     }
 
-    //@addMiddleware([AuthenticationController.checkAuthentication, AuthenticationController.secondMiddle])
+    @GET
+    @addMiddleware([
+        AuthenticationController.checkAuthentication,
+        AuthenticationController.secondMiddle,
+    ])
     public async tryViews() {
         console.log("RUN");
         this.res.render(new IndexView("Jesus"));

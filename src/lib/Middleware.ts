@@ -12,8 +12,8 @@ export function addMiddleware(stack: Array<IMiddlewareFunction>) {
     ) {
         const original = descriptor.value;
         descriptor.value = async function (...args: any[]) {
-            executeMiddlewareStack(stack, this);
-            return original.apply(this, args);
+            await executeMiddlewareStack(stack, this);
+            return await original.apply(this, args);
         };
         return descriptor;
     };
@@ -21,8 +21,8 @@ export function addMiddleware(stack: Array<IMiddlewareFunction>) {
 
 async function executeMiddlewareStack(
     stack: Array<IMiddlewareFunction>,
-    controller: Controller,
-) {
+    controller: Controller
+): Promise<void> {
     for (let index = 0; index < stack.length; index++) {
         await stack[index](controller);
     }
