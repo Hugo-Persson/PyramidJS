@@ -12,13 +12,14 @@ export default class Dashboard extends Controller {
         this.res.json(this.req.params);
     }
 
-    @addMiddleware([AuthenticationController.checkAuthentication])
-    @GET
-    public tryViews() {
+    //@addMiddleware([AuthenticationController.checkAuthentication, AuthenticationController.secondMiddle])
+    public async tryViews() {
+        console.log("RUN");
         this.res.render(new IndexView("Jesus"));
     }
     @GET
-    public tryCookies() {
+    public async tryCookies() {
+        await this.tryViews();
         this.tryViews();
     }
     @GET

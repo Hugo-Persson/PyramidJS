@@ -21,5 +21,7 @@ class Start extends Initialize {
     indexAction() {
         this.res.sendFile(process.cwd() + "/resources/index.html");
     }
+
 }
+console.log("START OF CODE");
 new Start();

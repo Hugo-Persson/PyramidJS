@@ -63,6 +63,7 @@ export default class Core {
         req: http.IncomingMessage,
         res: http.ServerResponse
     ): Promise<void> => {
+        console.log("THI SHOU OUT")
         const chunks: Array<string> = req.url.split("/");
         if (await this.getStaticFile(req, res)) return;
         chunks.shift(); // Remove empty element in the start

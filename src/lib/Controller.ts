@@ -162,6 +162,7 @@ export default class Controller {
             action = this.getAction("postActions", name);
         } else if (method == ActionType.GET) {
             action = this.getAction("getActions", name);
+            console.log(action);
         } else if (method == ActionType.DELETE) {
             action = this.getAction("deleteActions", name);
         } else if (method == ActionType.PUT) {

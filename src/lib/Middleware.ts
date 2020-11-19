@@ -1,11 +1,10 @@
 import Request from "@lib/Request";
 import Response from "@lib/Response";
-import { ExecOptionsWithBufferEncoding } from "child_process";
 import Controller from "./Controller";
 
 // Method Decorator
 export function addMiddleware(stack: Array<IMiddlewareFunction>) {
-    console.log("Middleware running");
+    console.log("Adding middleware");
     return function (
         target: Controller,
         key: string | symbol,
@@ -13,7 +12,7 @@ export function addMiddleware(stack: Array<IMiddlewareFunction>) {
     ) {
         const original = descriptor.value;
         descriptor.value = async function (...args: any[]) {
-            executeMiddlewareStack(stack, this, 0);
+            executeMiddlewareStack(stack, this);
             return original.apply(this, args);
         };
         return descriptor;
@@ -23,9 +22,10 @@ export function addMiddleware(stack: Array<IMiddlewareFunction>) {
 async function executeMiddlewareStack(
     stack: Array<IMiddlewareFunction>,
     controller: Controller,
-    index: number
 ) {
-    if (index < stack.length) await stack[index](controller);
+    for (let index = 0; index < stack.length; index++) {
+        await stack[index](controller);
+    }
 }
 
 export interface IMiddlewareFunction {
