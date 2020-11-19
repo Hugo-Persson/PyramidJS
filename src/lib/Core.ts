@@ -63,7 +63,6 @@ export default class Core {
         req: http.IncomingMessage,
         res: http.ServerResponse
     ): Promise<void> => {
-        console.log("THI SHOU OUT")
         const chunks: Array<string> = req.url.split("/");
         if (await this.getStaticFile(req, res)) return;
         chunks.shift(); // Remove empty element in the start
@@ -106,7 +105,6 @@ export default class Core {
             await this.initObj.noPageFound();
         }
         if (!controller.res.sendingFile) controller.res.end();
-        console.log("ended");
     };
 
     private async getStaticFile(
@@ -146,5 +144,9 @@ export default class Core {
                 resolve(JSON.parse(Buffer.concat(body).toString()));
             });
         });
+    }
+    private parseAction(action: string) {
+        const temp = action.replace("/(?<=-). /g", (s) => s.toUpperCase());
+        return temp.replace("-", "");
     }
 }
