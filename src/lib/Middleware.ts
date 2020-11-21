@@ -4,7 +4,6 @@ import Controller from "./Controller";
 
 // Method Decorator
 export function addMiddleware(stack: Array<IMiddlewareFunction>) {
-    console.log("Adding middleware");
     return function (
         target: Controller,
         key: string | symbol,

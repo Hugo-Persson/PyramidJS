@@ -77,7 +77,8 @@ export default class Core {
         if (chunks[0] == "") {
             // the / route
             controller = this.initObj;
-            action = "indexAction";
+
+            action = "index-action";
         } else {
             if (chunks.length == 1) {
                 chunks.push("index"); // If they don't specify a action then we default it to an index action
@@ -88,7 +89,7 @@ export default class Core {
             } catch (error) {
                 if (error == "404") {
                     controller = this.initObj;
-                    action = "noPageFound";
+                    action = "no-page-found";
                 } else {
                     console.log(error);
                     return;
@@ -102,7 +103,7 @@ export default class Core {
         controller.req = parsedReq;
         controller.res = parsedRes;
         if (
-            action == "noPageFound" ||
+            action == "no-page-found" ||
             !(await controller.runAction(
                 this.parseAction(action),
                 ActionType[req.method]
@@ -110,7 +111,7 @@ export default class Core {
         ) {
             this.initObj.req = controller.req;
             this.initObj.res = controller.res;
-            await this.initObj.noPageFound();
+            await this.initObj.runAction("noPageFound", ActionType[req.method]); // Parsing action not neccesary
         }
         if (!controller.res.sendingFile) controller.res.end();
     };

@@ -1,5 +1,6 @@
 import http from "http";
 import querystring from "querystring";
+import { ActionType } from "./Controller";
 
 export default class Request {
     private req: http.IncomingMessage;
@@ -47,5 +48,8 @@ export default class Request {
     }
     public get cookies(): object {
         return this.parsedCookies;
+    }
+    public get method(): ActionType {
+        return ActionType[this.req.method];
     }
 }

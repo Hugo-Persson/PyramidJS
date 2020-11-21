@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon --watch 'src/**' --ext 'ts,json' --ignore 'src/**/*.spec.ts' --exec 'ts-node src/index.ts'",
-    "build": "tsc && echo Warning, you need to move all your files not located in resources to build folder"
+    "build": "tsc && echo Warning, you need to move all your files not located in resources to build folder",
+    "start": "node build"
   },
   "repository": {
     "type": "git",

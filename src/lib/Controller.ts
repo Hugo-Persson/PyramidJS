@@ -12,7 +12,6 @@ export default class Controller {
      * @param name The name of the token, the name of the cookie that is stored
      */
     public async getTokenData(name: string): Promise<any> {
-        console.log(name, "   ", this.req.cookies);
         if (this.req.cookies[name]) {
             return this.verifyPromiseWrapper(this.req.cookies[name]);
         } else {
@@ -157,12 +156,10 @@ export default class Controller {
      */
     public async runAction(name: string, method: ActionType): Promise<boolean> {
         let action: string;
-
         if (method == ActionType.POST) {
             action = this.getAction("postActions", name);
         } else if (method == ActionType.GET) {
             action = this.getAction("getActions", name);
-            console.log(action);
         } else if (method == ActionType.DELETE) {
             action = this.getAction("deleteActions", name);
         } else if (method == ActionType.PUT) {

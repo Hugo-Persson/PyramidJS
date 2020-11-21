@@ -15,7 +15,6 @@ export default class Dashboard extends Controller {
     @GET
     @addMiddleware([AuthenticationController.checkAuthentication])
     public async tryViews() {
-        console.log(this.authData);
         this.res.render(new IndexView("Jesus"));
     }
     @GET

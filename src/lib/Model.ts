@@ -28,7 +28,6 @@ export abstract class Model {
                 port: parseInt(process.env.DB_PORT) || 3306,
             });
             this.dbConnection = await this.dbPool.getConnection();
-            console.log("database connection done");
             resolve();
         });
     }
@@ -141,7 +140,6 @@ export abstract class Model {
      */
     public static getSingleRowByFilter<T extends Model>(filter: T): Promise<T> {
         return new Promise<T>(async (resolve, reject) => {
-            console.log("CALLED");
             const whereValues = [];
             const filterColumns = [];
             filter.tableColumns.map((e) => {

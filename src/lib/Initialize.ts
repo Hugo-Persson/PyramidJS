@@ -6,18 +6,18 @@ export default abstract class Initialize extends Controller {
     preStart(): void {
         return;
     }
-    postStart(port: number): void {
+    postStart(port: number): any {
         return;
     }
     /**
      * @description For 404 requests, do not call it instead use res.throw404()
      *
      */
-    abstract async noPageFound(): Promise<void>;
+    abstract noPageFound(): any;
 
     /**
      * @description When the user want to reach the path "/"
      *
      */
-    abstract indexAction(): void;
+    abstract indexAction(): any;
 }
