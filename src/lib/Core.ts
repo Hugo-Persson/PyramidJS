@@ -34,9 +34,14 @@ export default class Core {
 
     private importController(controller: string): Promise<Controller> {
         return new Promise<Controller>(async (resolve, reject) => {
+            const parsedControllerAfterAction = this.parseAction(controller);
+            const parsedControllerName =
+                parsedControllerAfterAction.charAt(0).toUpperCase() +
+                parsedControllerAfterAction.slice(1);
+
             try {
                 var importedFile = await import(
-                    `../controllers/${controller}Controller`
+                    `../controllers/${parsedControllerName}Controller`
                 ); // eslint-disable-line no-use-before-define
 
                 var ImportedClass = importedFile.default; // eslint-disable-line no-use-before-define
