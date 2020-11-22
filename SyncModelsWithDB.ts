@@ -128,7 +128,20 @@ async function updateDb() {
 
     // Add missing tables and columns
     modelDef.map((tableVal: Table) => {
-        console.log(findIndexTable(dbDef, value));
+        const dbDefTableIndex = findIndexTable(dbDef, tableVal);
+        if (dbDefTableIndex == -1) {
+            addTable(tableVal);
+        } else {
+            tableVal.columns.map((columnValue) => {
+                const dbDefColumnIndex = findIndexColumn(
+                    dbDef[dbDefTableIndex].columns,
+                    columnValue
+                );
+                if (dbDefColumnIndex == -1) {
+                    addColumn(tableVal, columnValue);
+                }
+            });
+        }
     });
     exit(0);
 }
