@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        
         "experimentalDecorators": true,
         "module": "commonjs",
         "esModuleInterop": true,
@@ -8,6 +9,7 @@
         "sourceMap": true,
         "outDir": "build",
         "rootDir": "src",
+        
         "baseUrl": "./src",
         "paths": {
             "@controllers/*": [
@@ -24,7 +26,9 @@
             ]
         }
     },
+    /* "exclude": ["SyncModelsWithDB.ts"], */
     "lib": [
         "es2015"
     ]
+    
 }
