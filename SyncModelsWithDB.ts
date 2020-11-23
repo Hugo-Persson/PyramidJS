@@ -2,7 +2,7 @@ import "module-alias/register";
 require("dotenv").config();
 import mariadb from "mariadb";
 import fs from "fs";
-import { column } from "@lib/Model";
+import { ColumnProperties } from "./src/lib/Model";
 import { exit } from "process";
 
 // Logic
@@ -47,7 +47,6 @@ async function getModelTables(): Promise<Array<Table>> {
         modelFiles.map(async (value) => {
             if (value.slice(-3) == ".ts") {
                 const filenameNoExt = value.slice(0, -3);
-                console.log("./src/models/" + filenameNoExt);
                 const module = await import("./src/models/" + filenameNoExt);
                 const classDef = module.default;
                 const proto = Object.getPrototypeOf(new classDef());
@@ -56,11 +55,13 @@ async function getModelTables(): Promise<Array<Table>> {
                     (value) => {
                         return new Column(
                             value,
-                            proto.primaryKeys.includes(value)
+                            proto.primaryKeys.includes(value),
+                            proto.additionalProperties
+                                ? proto.additionalProperties[value]
+                                : undefined
                         );
                     }
                 );
-                console.log(classDef);
                 return new Table(classDef.tableName, columns);
             }
         })
@@ -81,7 +82,11 @@ async function getDBTables() {
             );
             const columns: Array<Column> = await Promise.all(
                 columnsData.map((value) => {
-                    return new Column(value.Field, value.Key == "PRI");
+                    return new Column(
+                        value.Field,
+                        value.Key == "PRI",
+                        undefined
+                    );
                 })
             );
             return new Table(tableName, columns);
@@ -124,13 +129,14 @@ async function updateDb() {
                 }
             });
         } else {
-            dropTable(value);
+            dropTable(tableValue);
         }
     });
 
     // Add missing tables and columns
     modelDef.map((tableVal: Table) => {
         const dbDefTableIndex = findIndexTable(dbDef, tableVal);
+
         if (dbDefTableIndex == -1) {
             addTable(tableVal);
         } else {
@@ -145,7 +151,12 @@ async function updateDb() {
             });
         }
     });
+    await executeQuerys();
     exit(0);
+}
+
+async function executeQuerys() {
+    console.log(querys);
 }
 
 function syncTables(master: Table, slave: Table) {}
@@ -158,15 +169,27 @@ function findIndexColumn(array: Array<Column>, column: Column): number {
     return array.findIndex((value) => value.name === column.name);
 }
 
+// DONE
 async function addTable(table: Table) {
     let query = `CREATE TABLE ${table.tablename}(`;
-    query+= table.columns.map((value: Column)=>{
-        return `${value.name}`;
-    }).join(",");
-    query+=")";
-    console.log(query);
+    query += table.columns
+        .map((value: Column) => {
+            let query = value.name;
+            if (value.additionalProperties) {
+                query += " " + value.additionalProperties.type;
+                if (value.additionalProperties.notNull) query += " NOT NULL";
+                if (value.additionalProperties.autoIncrement)
+                    query += " AUTO_INCREMENT";
+            }
+            return query;
+        })
+        .join(",");
+    query += ")";
+    querys.push(query);
 }
-async function addColumn(table: Table, column: Column) {}
+async function addColumn(table: Table, column: Column) {
+    let query = `ALTER TABLE ${table.tablename} ADD ${column.name}`;
+}
 async function dropTable(table: Table) {}
 async function dropColumn(table: Table, column: Column) {}
 async function setPrimaryKey(table: Table, column: Column, value: boolean) {}
@@ -182,8 +205,14 @@ class Table {
 class Column {
     name: string;
     primaryKey: boolean;
-    constructor(name: string, primaryKey: boolean) {
+    additionalProperties: ColumnProperties;
+    constructor(
+        name: string,
+        primaryKey: boolean,
+        additionalProperties: ColumnProperties
+    ) {
         this.name = name;
         this.primaryKey = primaryKey;
+        this.additionalProperties = additionalProperties;
     }
 }

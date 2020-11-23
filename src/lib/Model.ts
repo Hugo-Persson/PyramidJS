@@ -278,3 +278,15 @@ export function primaryKey(target: any, propertyKey: string) {
     if (!target.primaryKeys) target.primaryKeys = [];
     target.primaryKeys.push(propertyKey);
 }
+export function additionalProperties(properties: ColumnProperties) {
+    return function (target: any, propertyKey: string) {
+        if (!target.additionalProperties) target.additionalProperties = {};
+        target.additionalProperties[propertyKey] = properties;
+    };
+}
+
+export interface ColumnProperties {
+    type: string;
+    notNull?: boolean;
+    autoIncrement?: boolean;
+}

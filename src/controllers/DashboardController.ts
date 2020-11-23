@@ -6,6 +6,7 @@ import AuthenticationController from "@controllers/AuthenticationController";
 
 import Request from "@lib/Request";
 import Response from "@lib/Response";
+import Video from "@models/Videos";
 
 export default class Dashboard extends Controller {
     public tryParams() {
@@ -44,5 +45,10 @@ export default class Dashboard extends Controller {
     @POST
     public tryPostBody() {
         this.res.json(this.req.body);
+    }
+    @GET
+    public tryVid() {
+        console.log(new Video());
+        this.res.send("TEST");
     }
 }

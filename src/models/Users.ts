@@ -1,4 +1,4 @@
-import { Model, column, primaryKey } from "@lib/Model";
+import { Model, column, primaryKey, additionalProperties } from "@lib/Model";
 import Cars from "@models/Cars";
 export default class Users extends Model {
     @column
@@ -9,6 +9,10 @@ export default class Users extends Model {
 
     @column
     public password: string;
+
+    @column
+    @additionalProperties({ type: "INT(8)", notNull: true })
+    public age: number;
 
     protected static tableName = "users";
 

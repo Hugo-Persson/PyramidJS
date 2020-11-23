@@ -26,7 +26,7 @@
             ]
         }
     },
-    /* "exclude": ["SyncModelsWithDB.ts"], */
+    "exclude": ["SyncModelsWithDB.ts"],
     "lib": [
         "es2015"
     ]
