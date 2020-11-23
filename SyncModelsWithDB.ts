@@ -20,6 +20,8 @@ import { exit } from "process";
     store all querys in an array then execute them 
 */
 
+const querys: Array<string> = []; // Store all querys that should be executed at the end
+
 updateDb();
 
 let dbCon: mariadb.PoolConnection;
@@ -156,7 +158,14 @@ function findIndexColumn(array: Array<Column>, column: Column): number {
     return array.findIndex((value) => value.name === column.name);
 }
 
-async function addTable(table: Table) {}
+async function addTable(table: Table) {
+    let query = `CREATE TABLE ${table.tablename}(`;
+    query+= table.columns.map((value: Column)=>{
+        return `${value.name}`;
+    }).join(",");
+    query+=")";
+    console.log(query);
+}
 async function addColumn(table: Table, column: Column) {}
 async function dropTable(table: Table) {}
 async function dropColumn(table: Table, column: Column) {}
