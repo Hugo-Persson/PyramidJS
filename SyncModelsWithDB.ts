@@ -157,6 +157,12 @@ async function updateDb() {
 
 async function executeQuerys() {
     console.log(querys);
+    // return;
+    const promises: Array<Promise<any>> = querys.map((value) =>
+        dbCon.query(value)
+    );
+    const results = await Promise.all(promises);
+    console.log(results);
 }
 
 function syncTables(master: Table, slave: Table) {}
@@ -174,26 +180,51 @@ async function addTable(table: Table) {
     let query = `CREATE TABLE ${table.tablename}(`;
     query += table.columns
         .map((value: Column) => {
-            let query = value.name;
-            if (value.additionalProperties) {
-                query += " " + value.additionalProperties.type;
-                if (value.additionalProperties.notNull) query += " NOT NULL";
-                if (value.additionalProperties.autoIncrement)
-                    query += " AUTO_INCREMENT";
-            }
-            return query;
+            return getColumnSQLDescription(value);
         })
         .join(",");
+
+    const primaryKeys = table.columns
+        .filter((value) => value.primaryKey)
+        .map((value) => value.name);
+
+    if (primaryKeys.length) {
+        query += `, PRIMARY KEY (${primaryKeys.join(",")})`;
+    }
+
     query += ")";
     querys.push(query);
 }
 async function addColumn(table: Table, column: Column) {
-    let query = `ALTER TABLE ${table.tablename} ADD ${column.name}`;
+    const query = `ALTER TABLE ${table.tablename} ADD ${getColumnSQLDescription(
+        column
+    )}`;
+    querys.push(query);
 }
-async function dropTable(table: Table) {}
-async function dropColumn(table: Table, column: Column) {}
-async function setPrimaryKey(table: Table, column: Column, value: boolean) {}
+async function dropTable(table: Table) {
+    querys.push(`DROP TABLE ${table.tablename}`);
+}
+async function dropColumn(table: Table, column: Column) {
+    querys.push(`ALTER TABLE ${table.tablename} DROP COLUMN ${column.name}`);
+}
+async function setPrimaryKey(table: Table, column: Column, value: boolean) {
+    if (value)
+        querys.push(
+            `ALTER TABLE ${table.tablename} ADD PRIMARY KEY (${column.name})`
+        );
+    else querys.push(`ALTER TABLE ${table.tablename} DROP PRIMARY KEY`);
+}
 
+function getColumnSQLDescription(column: Column): string {
+    let query: string = column.name;
+    if (column.additionalProperties) {
+        query += " " + column.additionalProperties.type;
+        if (column.additionalProperties.notNull) query += " NOT NULL";
+        if (column.additionalProperties.autoIncrement)
+            query += " AUTO_INCREMENT";
+    }
+    return query;
+}
 class Table {
     tablename: string;
     columns: Array<Column>;

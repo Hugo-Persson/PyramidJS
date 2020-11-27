@@ -5,14 +5,11 @@ export default class Cars extends Model {
     @column
     public id: number;
     @column
-    public userId: number;
-    @column
     public name: string;
 
     protected static tableName = "cars";
 
-    constructor(userId?) {
+    constructor() {
         super();
-        this.userId = userId;
     }
 }

@@ -3,6 +3,11 @@ import { additionalProperties, column, Model, primaryKey } from "@lib/Model";
 export default class Video extends Model {
     @primaryKey
     @column
+    @additionalProperties({
+        type: "INT(8)",
+        notNull: true,
+        autoIncrement: true,
+    })
     public id: number;
     @column
     @additionalProperties({ type: "INT(8)", notNull: true })

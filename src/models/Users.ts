@@ -11,6 +11,7 @@ export default class Users extends Model {
     public password: string;
 
     @column
+    @primaryKey
     @additionalProperties({ type: "INT(8)", notNull: true })
     public age: number;
 
