@@ -2,6 +2,7 @@ import { Model, column, primaryKey, additionalProperties } from "@lib/Model";
 export default class Users extends Model {
     @column
     @primaryKey
+    @additionalProperties({ type: "INT(8)", notNull: true })
     public id: number;
     @column
     @additionalProperties({ type: "VARCHAR(40)", notNull: true })
