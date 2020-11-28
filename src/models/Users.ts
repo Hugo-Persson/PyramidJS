@@ -1,19 +1,15 @@
 import { Model, column, primaryKey, additionalProperties } from "@lib/Model";
-import Cars from "@models/Cars";
 export default class Users extends Model {
     @column
     @primaryKey
     public id: number;
     @column
+    @additionalProperties({ type: "VARCHAR(40)", notNull: true })
     public username: string;
 
     @column
+    @additionalProperties({ type: "VARCHAR(255)", notNull: true })
     public password: string;
-
-    @column
-    @primaryKey
-    @additionalProperties({ type: "INT(8)", notNull: true })
-    public age: number;
 
     protected static tableName = "users";
 
@@ -23,9 +19,5 @@ export default class Users extends Model {
         this.id = id;
         this.username = username;
         this.password = password;
-    }
-
-    public get cars(): Promise<Array<Cars>> {
-        return this.oneToMany<Cars>(Cars, "id", "userId");
     }
 }

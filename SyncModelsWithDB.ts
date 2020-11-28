@@ -4,21 +4,7 @@ import mariadb from "mariadb";
 import fs from "fs";
 import { ColumnProperties } from "./src/lib/Model";
 import { exit } from "process";
-
-// Logic
-/* 
-    Get both table def from models and def from DB
-    If table is in model def but not DB def then add table and all it columns
-    If table in DB def but not in model def then drop table
-    If table exist in DB and Model then compare
-    First go through all columns in db and findIndex in model def
-    if index == -1
-        remove drop column
-    else 
-        check if properties the same otherwise change
-    
-    store all querys in an array then execute them 
-*/
+import readline from "readline";
 
 const querys: Array<string> = []; // Store all querys that should be executed at the end
 
@@ -101,38 +87,42 @@ async function updateDb() {
 
     //Filter out db
 
-    dbDef.map((tableValue: Table) => {
+    const filterDBPromises = dbDef.map(async (tableValue: Table) => {
         const indexOfModelDef = findIndexTable(modelDef, tableValue);
         if (indexOfModelDef !== -1) {
-            tableValue.columns.map((columnValue: Column) => {
-                const columnInModelTableIndex = findIndexColumn(
-                    modelDef[indexOfModelDef].columns,
-                    columnValue
-                );
-                if (columnInModelTableIndex !== -1) {
-                    if (
-                        modelDef[indexOfModelDef].columns[
-                            columnInModelTableIndex
-                        ].primaryKey !== columnValue.primaryKey
-                    ) {
-                        // Updating primary key after what model def is saying
-                        setPrimaryKey(
-                            tableValue,
-                            columnValue,
+            const promises = tableValue.columns.map(
+                async (columnValue: Column) => {
+                    const columnInModelTableIndex = findIndexColumn(
+                        modelDef[indexOfModelDef].columns,
+                        columnValue
+                    );
+                    if (columnInModelTableIndex !== -1) {
+                        if (
                             modelDef[indexOfModelDef].columns[
                                 columnInModelTableIndex
-                            ].primaryKey
-                        );
+                            ].primaryKey !== columnValue.primaryKey
+                        ) {
+                            // Updating primary key after what model def is saying
+                            await setPrimaryKey(
+                                tableValue,
+                                columnValue,
+                                modelDef[indexOfModelDef].columns[
+                                    columnInModelTableIndex
+                                ].primaryKey
+                            );
+                        }
+                    } else {
+                        dropColumn(tableValue, columnValue);
                     }
-                } else {
-                    dropColumn(tableValue, columnValue);
                 }
-            });
+            );
+
+            await Promise.all(promises);
         } else {
             dropTable(tableValue);
         }
     });
-
+    await Promise.all(filterDBPromises);
     // Add missing tables and columns
     modelDef.map((tableVal: Table) => {
         const dbDefTableIndex = findIndexTable(dbDef, tableVal);
@@ -152,20 +142,36 @@ async function updateDb() {
         }
     });
     await executeQuerys();
-    exit(0);
 }
 
 async function executeQuerys() {
+    if (!querys.length) {
+        console.log("Models are already synced with DB");
+        exit(0);
+    }
+    console.log("Querys: ");
     console.log(querys);
-    // return;
-    const promises: Array<Promise<any>> = querys.map((value) =>
-        dbCon.query(value)
-    );
-    const results = await Promise.all(promises);
-    console.log(results);
-}
 
-function syncTables(master: Table, slave: Table) {}
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+    rl.question(
+        "Do you wish to execute these querys? y/n \n",
+        async (answer) => {
+            if (answer === "y") {
+                const promises: Array<Promise<any>> = querys.map((value) =>
+                    dbCon.query(value)
+                );
+                const results = await Promise.all(promises);
+                console.log("RESULT", results);
+            } else {
+                console.log("Ok, not executing anything");
+            }
+            exit(0);
+        }
+    );
+}
 
 function findIndexTable(array: Array<Table>, table: Table): number {
     return array.findIndex((value) => value.tablename === table.tablename);
@@ -175,7 +181,6 @@ function findIndexColumn(array: Array<Column>, column: Column): number {
     return array.findIndex((value) => value.name === column.name);
 }
 
-// DONE
 async function addTable(table: Table) {
     let query = `CREATE TABLE ${table.tablename}(`;
     query += table.columns
@@ -208,11 +213,21 @@ async function dropColumn(table: Table, column: Column) {
     querys.push(`ALTER TABLE ${table.tablename} DROP COLUMN ${column.name}`);
 }
 async function setPrimaryKey(table: Table, column: Column, value: boolean) {
-    if (value)
-        querys.push(
-            `ALTER TABLE ${table.tablename} ADD PRIMARY KEY (${column.name})`
-        );
-    else querys.push(`ALTER TABLE ${table.tablename} DROP PRIMARY KEY`);
+    const primaryKeys: Array<string> = await getPrimaryKeys(table);
+
+    if (value) primaryKeys.push(column.name);
+    else primaryKeys.splice(primaryKeys.indexOf(column.name));
+
+    querys.push(
+        `ALTER TABLE ${
+            table.tablename
+        } DROP PRIMARY KEY, ADD PRIMARY KEY(${primaryKeys.join(",")})`
+    );
+}
+async function getPrimaryKeys(table: Table): Promise<Array<string>> {
+    const query = `SHOW KEYS FROM ${table.tablename} WHERE Key_name = 'PRIMARY'`;
+    const result = await dbCon.query(query);
+    return result.map((value) => value.Column_name);
 }
 
 function getColumnSQLDescription(column: Column): string {
