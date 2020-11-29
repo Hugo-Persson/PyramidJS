@@ -2,6 +2,7 @@ import { rejects } from "assert";
 import { Mode } from "fs";
 import mariadb from "mariadb";
 import { monitorEventLoopDelay } from "perf_hooks";
+import IJunctionTable from "./IJunctionTable";
 export abstract class Model {
     private static dbConnection: mariadb.PoolConnection;
     private static dbPool: mariadb.Pool;
@@ -79,7 +80,7 @@ export abstract class Model {
         const columns: Array<string> = this.tableColumns.filter(
             (i) => i && this[i]
         );
-        const values = columns.map((i) => this[i]);
+        const values = columns.map((i) => this[i]).filter((value) => value);
         const questionMarks = values.map(() => "?").join(",");
         let queryString = `INSERT INTO ${this.getTableName} (${columns.join(
             ", "
@@ -264,10 +265,34 @@ export abstract class Model {
      * @param {string} forreignKey - The forreign key of the realted model
      * @returns {Model} - Returns one model that belongs to this class
      */
-    protected manyToMany<T extends Model>(relatedModel: new () => T): Model {
-        return new relatedModel();
+    protected async manyToMany<T extends Model>(
+        relatedModel: new () => T,
+        junctionModel: new () => IJunctionTable,
+        primaryKey: string,
+        foreignKey: string
+    ): Promise<Array<T>> {
+        const junctionResults: Array<IJunctionTable> = await this.oneToMany(
+            junctionModel,
+            primaryKey,
+            foreignKey
+        );
+        const relatedModelPromises: Array<Promise<
+            T
+        >> = junctionResults.map(async (value) =>
+            value.firstClassDef === relatedModel
+                ? ((await value.getFirst()) as T)
+                : ((await value.getSecond()) as T)
+        );
+
+        return Promise.all(relatedModelPromises);
     }
 }
+/* 
+------------------------
+    DECORATORS
+------------------------
+
+*/
 
 export function column(target: any, propertyKey: string) {
     if (!target.tableColumns) target.tableColumns = [];

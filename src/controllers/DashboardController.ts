@@ -6,7 +6,8 @@ import AuthenticationController from "@controllers/AuthenticationController";
 
 import Request from "@lib/Request";
 import Response from "@lib/Response";
-import Video from "@models/Videos";
+import User from "@models/User";
+import Car from "@models/Car";
 
 export default class Dashboard extends Controller {
     public tryParams() {
@@ -50,5 +51,17 @@ export default class Dashboard extends Controller {
     public tryVid() {
         console.log(new Video());
         this.res.send("TEST");
+    }
+    @GET
+    public tryManyToMany() {
+        const user = new User();
+        user.cars;
+        this.res.send("TEST");
+    }
+    @GET
+    public async createCar() {
+        const car = new Car(undefined, "Nissan", 2015);
+        const result = await car.save();
+        this.res.json(result);
     }
 }
