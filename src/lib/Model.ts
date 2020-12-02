@@ -80,15 +80,18 @@ export abstract class Model {
         const columns: Array<string> = this.tableColumns.filter(
             (i) => i && this[i]
         );
-        const values = columns.map((i) => this[i]).filter((value) => value);
+        const values = columns.map((i) => this[i]);
+        console.log("VALUES", columns);
         const questionMarks = values.map(() => "?").join(",");
         let queryString = `INSERT INTO ${this.getTableName} (${columns.join(
             ", "
         )}) VALUES (${questionMarks})`;
-        const result: mariadb.UpsertResult = await Model.dbConnection.query(
-            queryString,
-            values
-        );
+
+        const result = await Model.dbConnection.query(queryString, values);
+        console.log(result);
+        if (result.insertId && this.tableColumns.includes("id"))
+            this["id"] = result.insertId;
+
         return result;
     }
     //#endregion

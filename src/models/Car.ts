@@ -5,7 +5,11 @@ import UsersCars from "./Users-Cars";
 export default class Car extends Model {
     @column
     @primaryKey
-    @additionalProperties({ type: "INT(8)", notNull: true })
+    @additionalProperties({
+        type: "INT(8)",
+        notNull: true,
+        autoIncrement: true,
+    })
     public id: number;
     @column
     @additionalProperties({ type: "VARCHAR(40)", notNull: true })
@@ -25,6 +29,6 @@ export default class Car extends Model {
         this.year = year;
     }
     public get users() {
-        return this.manyToMany<User>(User, UsersCars, "id", "userId");
+        return this.manyToMany<User>(User, UsersCars, "id", "carId");
     }
 }

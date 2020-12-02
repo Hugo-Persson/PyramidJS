@@ -36,6 +36,7 @@ export default class AuthenticationController extends Controller {
         try {
             if (await bcrypt.compare(password, user.password)) {
                 this.res.setStatusCode(200);
+                console.log("ID", user.id);
                 await this.generateToken({
                     type: "auth",
                     id: user.id,

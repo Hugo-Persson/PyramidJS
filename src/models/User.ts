@@ -4,7 +4,11 @@ import UsersCars from "./Users-Cars";
 export default class User extends Model {
     @column
     @primaryKey
-    @additionalProperties({ type: "INT(8)", notNull: true })
+    @additionalProperties({
+        type: "INT(8)",
+        notNull: true,
+        autoIncrement: true,
+    })
     public id: number;
     @column
     @additionalProperties({ type: "VARCHAR(40)", notNull: true })

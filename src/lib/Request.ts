@@ -43,7 +43,7 @@ export default class Request {
     public get queryStrings(): object {
         return this.queryStrings;
     }
-    public get params(): object {
+    public get params(): any {
         return this.privateParam;
     }
     public get cookies(): object {
