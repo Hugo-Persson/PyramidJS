@@ -1,16 +1,14 @@
 import Controller, { GET, POST } from "@lib/Controller";
 import IndexView from "@views/IndexView";
-import { PassThrough } from "stream";
 import { addMiddleware } from "@lib/Middleware";
 import AuthenticationController from "@controllers/AuthenticationController";
 
-import Request from "@lib/Request";
-import Response from "@lib/Response";
+
 import User from "@models/User";
 import Car from "@models/Car";
 import UsersCars from "@models/Users-Cars";
 
-export default class Dashboard extends Controller {
+export default class ExampleController extends Controller {
     public tryParams() {
         this.res.json(this.req.params);
     }
@@ -74,15 +72,12 @@ export default class Dashboard extends Controller {
         const user = await User.getSingleRowByFilter(
             new User(this.authData.id)
         );
-        console.log("CARS", await user.cars);
-        this.res.send("DONE");
+        this.res.json(user.cars);
     }
     @GET
     public async getUsersFromCar() {
         const id = this.req.params.id;
         const car = await Car.getSingleRowByFilter(new Car(id));
-        console.log(car);
-
         this.res.json(await car.users);
     }
 }
