@@ -159,6 +159,6 @@ export default class Core {
         const temp = action
             .toLowerCase()
             .replace(regex2, (s) => s.toUpperCase());
-        return temp.replace("-", "");
+        return temp.split("-").join("");
     }
 }

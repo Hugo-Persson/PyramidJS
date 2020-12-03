@@ -1,5 +1,5 @@
 import Controller, { POST, TokenAssignmentMethod } from "@lib/Controller";
-import Users from "@models/Users";
+import User from "@models/User";
 import bcrypt from "bcrypt";
 import Request from "@lib/Request";
 import Response from "@lib/Response";
@@ -21,9 +21,9 @@ export default class AuthenticationController extends Controller {
             this.res.setStatusCode(400); // Bad Request
             this.res.send("NoPassword");
         }
-        const user = await Users.getSingleRowByFilter(
+        const user = await User.getSingleRowByFilter(
             // Fetch the desired user from the database
-            new Users(undefined, username)
+            new User(undefined, username)
         );
         if (!user.id) {
             this.res.setStatusCode(400); // Bad Request
@@ -72,9 +72,9 @@ export default class AuthenticationController extends Controller {
             this.res.send("NoPassword");
             return;
         }
-        const userInDb = await Users.getSingleRowByFilter(
+        const userInDb = await User.getSingleRowByFilter(
             // Fetch the desired user from the database
-            new Users(undefined, username)
+            new User(undefined, username)
         );
         if (userInDb.id) {
             this.res.setStatusCode(400); // Bad Request
@@ -83,7 +83,7 @@ export default class AuthenticationController extends Controller {
             return;
         }
         try {
-            const newUser = new Users(
+            const newUser = new User(
                 undefined,
                 username,
                 await await bcrypt.hash(password, 10)

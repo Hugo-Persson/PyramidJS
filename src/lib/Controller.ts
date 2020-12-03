@@ -155,7 +155,6 @@ export default class Controller {
      * @param method What type of http request is sent
      */
     public async runAction(name: string, method: ActionType): Promise<boolean> {
-        console.log("NAME", name);
         let action: string;
         if (method == ActionType.POST) {
             action = this.getAction("postActions", name);
