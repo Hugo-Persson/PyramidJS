@@ -3,7 +3,6 @@ import IndexView from "@views/IndexView";
 import { addMiddleware } from "@lib/Middleware";
 import AuthenticationController from "@controllers/AuthenticationController";
 
-
 import User from "@models/User";
 import Car from "@models/Car";
 import UsersCars from "@models/Users-Cars";
@@ -63,6 +62,11 @@ export default class ExampleController extends Controller {
     @GET
     @addMiddleware([AuthenticationController.checkAuthentication])
     public async getCars() {
+        console.log(this.authData);
+        if (!this.authData) {
+            this.res.send("No auth");
+            return;
+        }
         const user = await User.getSingleRowByFilter(
             new User(this.authData.id)
         );
@@ -73,5 +77,9 @@ export default class ExampleController extends Controller {
         const id = this.req.params.id;
         const car = await Car.getSingleRowByFilter(new Car(id));
         this.res.json(await car.users);
+    }
+    @GET
+    public async tryFetching() {
+        this.res.json(await Car.getManyRowsByFilter(new Car(1)));
     }
 }

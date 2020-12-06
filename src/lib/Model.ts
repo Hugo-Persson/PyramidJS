@@ -109,22 +109,46 @@ export abstract class Model {
     public static async getManyRowsByFilter<T extends Model>(
         filter: T
     ): Promise<Array<T>> {
+        return this.fetchRows(filter);
+    }
+    /**
+     * @param {Model} filter - An object of the model you want to return with the properties you want to filter after, for example if you want a user with the id=1 and name="hugo" then pass a User object with these properties set pass - new User(1,"hugo")
+     * @returns {Array<T>} - Returns a signle object of type T
+     */
+    public static async getSingleRowByFilter<T extends Model>(
+        filter: T
+    ): Promise<T> {
+        const rows = await this.fetchRows(filter, true);
+        if (rows.length) {
+            return rows[0];
+        } else {
+            return undefined;
+        }
+    }
+
+    private static async fetchRows<T extends Model>(
+        filter: T,
+        limit: boolean = false
+    ): Promise<Array<T>> {
         const whereValues = [];
         const filterColumns = [];
+        if (!filter) {
+            throw "No filter provided for getManyRowsByFilter function";
+            return;
+        }
         filter.tableColumns.map((e) => {
             if (filter[e]) {
                 whereValues.push(filter[e]);
                 filterColumns.push(`${e}=?`);
             }
         });
-
-        const query = `SELECT * FROM  ${
-            this.tableName
-        } WHERE ${filterColumns.join(",")}`;
+        const query = `SELECT * FROM  ${filter.getTableName} ${
+            filterColumns.length ? "WHERE" : ""
+        } ${filterColumns.join(",")} ${limit ? `LIMIT 1 ` : ""} `;
 
         const queryResult = await Model.dbConnection.query(query, whereValues);
-        const filterClass = Object.getPrototypeOf(filter).constructor;
         const returnArray: Array<T> = [];
+        const filterClass = Object.getPrototypeOf(filter).constructor;
         queryResult.map((value) => {
             const tempModel: T = new filterClass();
             for (let key in value) {
@@ -135,46 +159,6 @@ export abstract class Model {
             returnArray.push(tempModel);
         });
         return returnArray;
-    }
-    /**
-     * @param {Model} filter - An object of the model you want to return with the properties you want to filter after, for example if you want a user with the id=1 and name="hugo" then pass a User object with these properties set pass - new User(1,"hugo")
-     * @returns {Array<T>} - Returns a signle object of type T
-     */
-    public static getSingleRowByFilter<T extends Model>(filter: T): Promise<T> {
-        return new Promise<T>(async (resolve, reject) => {
-            const whereValues = [];
-            const filterColumns = [];
-            filter.tableColumns.map((e) => {
-                if (filter[e]) {
-                    whereValues.push(filter[e]);
-                    filterColumns.push(`${e}=?`);
-                }
-            });
-
-            const query = `SELECT * FROM  ${
-                filter.getTableName
-            } WHERE ${filterColumns.join(",")} LIMIT 1`;
-
-            const queryResult = await Model.dbConnection.query(
-                query,
-                whereValues
-            );
-
-            const filterClass = Object.getPrototypeOf(filter).constructor;
-            if (!queryResult.length) {
-                const newObject = new filterClass();
-                resolve(newObject);
-            }
-
-            const tempModel: T = new filterClass();
-            for (let key in queryResult[0]) {
-                tempModel[key] = queryResult[0][key];
-            }
-            tempModel.newlyCreated = false;
-            tempModel.originalData = queryResult[0];
-
-            resolve(tempModel);
-        });
     }
     //#endregion "fetching rows"
 
