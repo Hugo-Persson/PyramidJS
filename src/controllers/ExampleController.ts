@@ -8,9 +8,7 @@ import Car from "@models/Car";
 import UsersCars from "@models/Users-Cars";
 
 export default class ExampleController extends Controller {
-    public tryParams() {
-        this.res.json(this.req.params);
-    }
+    globalMiddleware = [testMiddleware];
 
     @GET
     @addMiddleware([AuthenticationController.checkAuthentication])
@@ -82,4 +80,15 @@ export default class ExampleController extends Controller {
     public async tryFetching() {
         this.res.json(await Car.getManyRowsByFilter(new Car(1)));
     }
+    @GET
+    @addMiddleware([now])
+    public async testFunction() {
+        this.res.send("TEST");
+    }
+}
+async function testMiddleware(controller: Controller) {
+    console.log("a middleware");
+}
+async function now(controller: Controller) {
+    console.log("now");
 }

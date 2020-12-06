@@ -2,11 +2,15 @@ import Request from "@lib/Request";
 import Response from "@lib/Response";
 import jwt from "jsonwebtoken";
 import { exit } from "process";
+import { executeMiddlewareStack, IMiddlewareFunction } from "@lib/Middleware";
 
 export default class Controller {
     req: Request;
     res: Response;
     public authData = undefined;
+
+    protected globalMiddleware: Array<IMiddlewareFunction> = [];
+
     /**
      * Will try to get the data for a token, will be rejected if the data can not be verified
      * @param name The name of the token, the name of the cookie that is stored
@@ -167,6 +171,9 @@ export default class Controller {
         } else {
             console.log("No method provided");
             return true;
+        }
+        if (this.globalMiddleware.length) {
+            await executeMiddlewareStack(this.globalMiddleware, this);
         }
         if (action) {
             await this[action].bind(this)(); // I use bind because I want this to be tied to this object not this function, it gets a bit buggy when I run the code like this

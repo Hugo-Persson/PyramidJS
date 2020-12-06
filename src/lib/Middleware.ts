@@ -18,7 +18,7 @@ export function addMiddleware(stack: Array<IMiddlewareFunction>) {
     };
 }
 
-async function executeMiddlewareStack(
+export async function executeMiddlewareStack(
     stack: Array<IMiddlewareFunction>,
     controller: Controller
 ): Promise<void> {
