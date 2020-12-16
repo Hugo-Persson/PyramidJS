@@ -8,7 +8,7 @@ import Car from "@models/Car";
 import UsersCars from "@models/Users-Cars";
 
 export default class ExampleController extends Controller {
-    globalMiddleware = [testMiddleware];
+    controllerSpecificMiddleware = [testMiddleware];
 
     @GET
     @addMiddleware([AuthenticationController.checkAuthentication])
@@ -83,6 +83,11 @@ export default class ExampleController extends Controller {
     @GET
     @addMiddleware([now])
     public async testFunction() {
+        this.res.send("TEST");
+    }
+
+    @GET
+    public async tryHeaders() {
         this.res.send("TEST");
     }
 }

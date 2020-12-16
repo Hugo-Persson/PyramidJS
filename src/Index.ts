@@ -1,14 +1,15 @@
 import "module-alias/register";
 import Core from "@lib/Core";
 import Initialize from "@lib/Initialize";
-import { GET } from "@lib/Controller";
+import Controller, { GET } from "@lib/Controller";
+import cors from "@lib/Cors";
 
 class Start extends Initialize {
     core: Core;
 
     constructor() {
         super();
-
+        Controller.applicationSpecificMiddleware.push(cors);
         this.core = new Core(this, true);
     }
     async postStart(port: number) {

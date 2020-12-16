@@ -13,23 +13,24 @@ export default class AuthenticationController extends Controller {
         const { username, password } = this.req.body;
         if (!username) {
             this.res.setStatusCode(400); // Bad Request
-            this.res.send("NoUsername");
+            this.res.json({ error: true, message: "NoUsername" });
 
             return;
         }
         if (!password) {
             this.res.setStatusCode(400); // Bad Request
-            this.res.send("NoPassword");
+            this.res.json({ error: true, message: "NoPassword" });
         }
         const user = await User.getSingleRowByFilter(
             // Fetch the desired user from the database
             new User(undefined, username)
         );
-        if (!user.id) {
-            this.res.setStatusCode(400); // Bad Request
-            this.res.send(
-                "ERROR, no user exists with that username, please register a new account"
-            );
+        if (!user || !user.id) {
+            //this.res.setStatusCode(400); // Bad Request
+            this.res.json({
+                error: true,
+                message: "NoUser",
+            });
 
             return;
         }
@@ -44,7 +45,7 @@ export default class AuthenticationController extends Controller {
                 this.res.send("SUCCESS, you are logged in");
             } else {
                 this.res.setStatusCode(403); // Forbidden
-                this.res.send("WrongPassword");
+                this.res.json({ error: true, message: "WrongPassword" });
             }
         } catch (error) {
             this.res.setStatusCode(500);
@@ -63,13 +64,16 @@ export default class AuthenticationController extends Controller {
         const { username, password } = this.req.body;
         if (!username) {
             this.res.setStatusCode(400); // Bad Request
-            this.res.send("NoUsername");
+            this.res.json({
+                error: true,
+                message: "User created and you are signed in",
+            });
 
             return;
         }
         if (!password) {
             this.res.setStatusCode(400); // Bad Request
-            this.res.send("NoPassword");
+            this.res.json({ error: true, message: "NoPassword" });
             return;
         }
         const userInDb = await User.getSingleRowByFilter(
@@ -77,8 +81,8 @@ export default class AuthenticationController extends Controller {
             new User(undefined, username)
         );
         if (userInDb.id) {
-            this.res.setStatusCode(400); // Bad Request
-            this.res.send("UserExists");
+            //this.res.setStatusCode(400); // Bad Request
+            this.res.json({ error: true, message: "UserExists" });
 
             return;
         }
@@ -96,10 +100,13 @@ export default class AuthenticationController extends Controller {
             });
             this.res.setStatusCode(200);
 
-            this.res.send("User created and you are signed in");
+            this.res.json({
+                error: false,
+                message: "User created and you are signed in",
+            });
         } catch (error) {
             console.error(error);
-            this.res.send("Unknown Error");
+            this.res.json({ error: true, message: "Unknown Error" });
             this.res.setStatusCode(500); // Internal server error
         }
     }

@@ -9,8 +9,9 @@ export default class Controller {
     res: Response;
     public authData = undefined;
 
-    protected globalMiddleware: Array<IMiddlewareFunction> = [];
+    protected controllerSpecificMiddleware: Array<IMiddlewareFunction> = [];
 
+    static applicationSpecificMiddleware: Array<IMiddlewareFunction> = [];
     /**
      * Will try to get the data for a token, will be rejected if the data can not be verified
      * @param name The name of the token, the name of the cookie that is stored
@@ -168,14 +169,28 @@ export default class Controller {
             action = this.getAction("deleteActions", name);
         } else if (method == ActionType.PUT) {
             action = this.getAction("putActions", name);
+        } else if (method == ActionType.OPTIONS) {
+            action = this.getAction("optionsActions", name);
         } else {
             console.log("No method provided");
             return true;
         }
-        if (this.globalMiddleware.length) {
-            await executeMiddlewareStack(this.globalMiddleware, this);
-        }
+
         if (action) {
+            if (this.controllerSpecificMiddleware.length) {
+                // Apply controller specific middleware
+                await executeMiddlewareStack(
+                    this.controllerSpecificMiddleware,
+                    this
+                );
+            }
+            if (Controller.applicationSpecificMiddleware.length) {
+                // Apply application specific middleware
+                await executeMiddlewareStack(
+                    Controller.applicationSpecificMiddleware,
+                    this
+                );
+            }
             await this[action].bind(this)(); // I use bind because I want this to be tied to this object not this function, it gets a bit buggy when I run the code like this
             return true;
         } else {
@@ -194,6 +209,7 @@ export enum ActionType {
     POST,
     PUT,
     DELETE,
+    OPTIONS,
 }
 
 export function GET(
