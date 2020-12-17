@@ -2,16 +2,16 @@ import Request from "@lib/Request";
 import Response from "@lib/Response";
 import jwt from "jsonwebtoken";
 import { exit } from "process";
-import { executeMiddlewareStack, IMiddlewareFunction } from "@lib/Middleware";
+import { executeMiddlewareStack } from "@lib/Middleware";
 
 export default class Controller {
     req: Request;
     res: Response;
     public authData = undefined;
 
-    protected controllerSpecificMiddleware: Array<IMiddlewareFunction> = [];
+    protected controllerSpecificMiddleware: Array<Function> = [];
 
-    static applicationSpecificMiddleware: Array<IMiddlewareFunction> = [];
+    static applicationSpecificMiddleware: Array<Function> = [];
     /**
      * Will try to get the data for a token, will be rejected if the data can not be verified
      * @param name The name of the token, the name of the cookie that is stored

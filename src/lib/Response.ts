@@ -7,6 +7,9 @@ import View from "./View";
 export default class Response {
     private res: http.ServerResponse;
     public sendingFile: boolean = false;
+
+    public jsonAddData: any = {};
+
     constructor(res: http.ServerResponse) {
         this.res = res;
     }
@@ -75,7 +78,7 @@ export default class Response {
         this.res.writeHead(200, {
             "Content-Type": "application/json",
         });
-        this.send(JSON.stringify(data));
+        this.send(JSON.stringify(Object.assign(data, this.jsonAddData)));
     }
     /**
      * Will render a view object and send the rendered content to the client data should already have been passed to the object

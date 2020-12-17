@@ -3,7 +3,7 @@ import Response from "@lib/Response";
 import Controller from "./Controller";
 
 // Method Decorator
-export function addMiddleware(stack: Array<IMiddlewareFunction>) {
+export function addMiddleware(stack: Array<Function>) {
     return function (
         target: Controller,
         key: string | symbol,
@@ -19,14 +19,10 @@ export function addMiddleware(stack: Array<IMiddlewareFunction>) {
 }
 
 export async function executeMiddlewareStack(
-    stack: Array<IMiddlewareFunction>,
+    stack: Array<Function>,
     controller: Controller
 ): Promise<void> {
     for (let index = 0; index < stack.length; index++) {
         await stack[index](controller);
     }
-}
-
-export interface IMiddlewareFunction {
-    (controller: Controller): Promise<void>;
 }

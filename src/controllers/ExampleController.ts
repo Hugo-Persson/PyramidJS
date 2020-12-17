@@ -11,6 +11,11 @@ export default class ExampleController extends Controller {
     controllerSpecificMiddleware = [testMiddleware];
 
     @GET
+    public async tryJson() {
+        this.res.jsonAddData.data = { data: "HAHA" };
+        this.res.json({ DATA: "DATA" });
+    }
+    @GET
     @addMiddleware([AuthenticationController.checkAuthentication])
     public async tryViews() {
         this.res.render(new IndexView("Jesus"));
