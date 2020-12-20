@@ -22,20 +22,23 @@ export default abstract class Initialize extends Controller {
      */
     abstract indexAction(): any;
 
-    public async runMiddleware(): Promise<void> {
+    public async runMiddleware(): Promise<boolean> {
         if (this.controllerSpecificMiddleware.length) {
             // Apply controller specific middleware
-            await executeMiddlewareStack(
+            const result = await executeMiddlewareStack(
                 this.controllerSpecificMiddleware,
                 this
             );
+            if (!result) return false;
         }
         if (Controller.applicationSpecificMiddleware.length) {
             // Apply application specific middleware
-            await executeMiddlewareStack(
+            const result = await executeMiddlewareStack(
                 Controller.applicationSpecificMiddleware,
                 this
             );
+            if (!result) return false;
         }
+        return true;
     }
 }

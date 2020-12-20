@@ -111,7 +111,7 @@ export default class Core {
         ) {
             this.initObj.req = controller.req;
             this.initObj.res = controller.res;
-            await this.initObj.runMiddleware();
+            if (!(await this.initObj.runMiddleware())) return;
             await this.initObj.noPageFound();
             //await this.initObj.runAction("noPageFound", ActionType[req.method]); // Parsing action not neccesary
         }

@@ -158,6 +158,7 @@ export default class Controller {
      * Is used to run an action in a controller, this should only be called by the core
      * @param name The name of the action you want to run
      * @param method What type of http request is sent
+     * @returns A boolean, if true then no further action is needed if false then go to
      */
     public async runAction(name: string, method: ActionType): Promise<boolean> {
         let action: string;
@@ -179,17 +180,19 @@ export default class Controller {
         if (action) {
             if (this.controllerSpecificMiddleware.length) {
                 // Apply controller specific middleware
-                await executeMiddlewareStack(
+                const result = await executeMiddlewareStack(
                     this.controllerSpecificMiddleware,
                     this
                 );
+                if (!result) return true;
             }
             if (Controller.applicationSpecificMiddleware.length) {
                 // Apply application specific middleware
-                await executeMiddlewareStack(
+                const result = await executeMiddlewareStack(
                     Controller.applicationSpecificMiddleware,
                     this
                 );
+                if (!result) return true;
             }
             await this[action].bind(this)(); // I use bind because I want this to be tied to this object not this function, it gets a bit buggy when I run the code like this
             return true;

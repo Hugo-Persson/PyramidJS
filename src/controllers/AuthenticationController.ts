@@ -25,7 +25,8 @@ export default class AuthenticationController extends Controller {
             // Fetch the desired user from the database
             new User(undefined, username)
         );
-        if (!user || !user.id) {
+        console.log(Boolean(user));
+        if (!user || user.id === undefined) {
             //this.res.setStatusCode(400); // Bad Request
             this.res.json({
                 error: true,
@@ -80,7 +81,7 @@ export default class AuthenticationController extends Controller {
             // Fetch the desired user from the database
             new User(undefined, username)
         );
-        if (userInDb.id) {
+        if (userInDb && userInDb.id) {
             //this.res.setStatusCode(400); // Bad Request
             this.res.json({ error: true, message: "UserExists" });
 
