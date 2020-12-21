@@ -200,9 +200,10 @@ export abstract class Model {
         foreignKey: string
     ): Promise<Array<T>> {
         const queryString: string = `SELECT * FROM ${relatedModel["tableName"]} WHERE ${foreignKey}=?`;
+
         const queryResult: Array<Object> = await Model.dbConnection.query(
             queryString,
-            this[primaryKey]
+            String(this[primaryKey]) // I need to convert to string because if id = 0 it is ignored
         );
         return queryResult.map((value) => {
             const obj: T = new relatedModel();
@@ -230,7 +231,7 @@ export abstract class Model {
         const query = `SELECT * FROM ${relatedModel["tableName"]} WHERE ${foreignKey} = ? LIMIT 1`;
         const result: Array<object> = await Model.dbConnection.query(
             query,
-            this[primaryKey]
+            String(this[primaryKey])
         );
         if (!result.length) {
             return undefined;
