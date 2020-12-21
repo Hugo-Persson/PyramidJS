@@ -272,6 +272,20 @@ export abstract class Model {
 
         return Promise.all(relatedModelPromises);
     }
+
+    /* 
+    ----------------------
+    EXTRA
+    ----------------
+    */
+    public toJSON() {
+        const object = { ...this };
+        object.primaryKeys = undefined;
+        object.tableColumns = undefined;
+        object.newlyCreated = undefined;
+        object.originalData = undefined;
+        return object;
+    }
 }
 /* 
 ------------------------
