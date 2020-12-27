@@ -2,8 +2,7 @@ import http from "http";
 import querystring from "querystring";
 import { ActionType } from "./Controller";
 
-export default class Request {
-    private req: http.IncomingMessage;
+export default class Request extends http.IncomingMessage {
     private queryStringsSave: object;
     private privateParam: object = {};
     private parsedCookies: object = {};
@@ -11,11 +10,11 @@ export default class Request {
     public authed = false;
 
     readonly body: any;
-    constructor(req: http.IncomingMessage, body: any) {
-        this.req = req;
-        this.queryStringsSave = querystring.parse(req.url);
+    constructor(socket) {
+        super(socket);
+        this.queryStringsSave = querystring.parse(this.url);
 
-        const pathSegments = req.url.split("/");
+        const pathSegments = this.url.split("/");
         if (pathSegments.length > 3) {
             for (let index = 3; index + 1 < pathSegments.length; index += 2) {
                 const element = pathSegments[index];
@@ -23,14 +22,14 @@ export default class Request {
             }
         }
         this.parsedCookies = this.parseCookies();
-        this.body = body;
+        //this.body = body;
     }
 
     private parseCookies(): object {
-        if (!this.req.headers.cookie) {
+        if (!this.headers.cookie) {
             return {};
         }
-        const chunks = this.req.headers.cookie.split(";");
+        const chunks = this.headers.cookie.split(";");
         const result = {};
         chunks.map((value) => {
             const pairs = value.split("=");
@@ -49,7 +48,7 @@ export default class Request {
     public get cookies(): object {
         return this.parsedCookies;
     }
-    public get method(): ActionType {
+    /* public get method(): ActionType {
         return ActionType[this.req.method];
-    }
+    } */
 }

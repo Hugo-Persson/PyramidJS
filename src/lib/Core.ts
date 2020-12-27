@@ -26,7 +26,10 @@ export default class Core {
     private async startServer(): Promise<void> {
         this.initObj.preStart();
         await Model.startDatabaseConnection();
-        this.server = http.createServer(this.handleHttpRequest);
+        this.server = http.createServer(
+            { IncomingMessage: Request, ServerResponse: Response },
+            this.handleHttpRequest
+        );
         this.server.listen(this.port, "localhost", () =>
             this.initObj.postStart(this.port)
         );
@@ -65,8 +68,8 @@ export default class Core {
     }
 
     private handleHttpRequest = async (
-        req: http.IncomingMessage,
-        res: http.ServerResponse
+        req: Request,
+        res: Response
     ): Promise<void> => {
         const chunks: Array<string> = req.url.split("/");
         if (await this.getStaticFile(req, res)) return;
@@ -97,11 +100,10 @@ export default class Core {
             }
         }
 
-        const parsedReq = new Request(req, await this.parseBody(req));
-        const parsedRes = new Response(res);
-
-        controller.req = parsedReq;
-        controller.res = parsedRes;
+        // @ts-ignore
+        req["body"] = await this.parseBody(req);
+        controller.req = req;
+        controller.res = res;
         if (
             action == "no-page-found" ||
             !(await controller.runAction(
@@ -118,10 +120,7 @@ export default class Core {
         if (!controller.res.sendingFile) controller.res.end();
     };
 
-    private async getStaticFile(
-        req: http.IncomingMessage,
-        res: http.ServerResponse
-    ): Promise<boolean> {
+    private async getStaticFile(req: Request, res: Response): Promise<boolean> {
         if (this.userEnabledStaticFiles) {
             try {
                 const stat = await fs.lstat(
@@ -129,8 +128,7 @@ export default class Core {
                 );
 
                 if (stat.isFile()) {
-                    const responseObj = new Response(res);
-                    responseObj.sendFile(process.cwd() + "/public/" + req.url);
+                    res.sendFile(process.cwd() + "/public/" + req.url);
                     return true;
                 } else {
                     return false;

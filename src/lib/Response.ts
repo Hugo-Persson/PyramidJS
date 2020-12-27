@@ -4,21 +4,20 @@ import fs, { ReadStream } from "fs";
 import mime from "mime-types";
 import View from "./View";
 
-export default class Response {
-    private res: http.ServerResponse;
+export default class Response extends http.ServerResponse {
     public sendingFile: boolean = false;
 
     public jsonAddData: any = {};
 
-    constructor(res: http.ServerResponse) {
-        this.res = res;
+    constructor(req: http.IncomingMessage) {
+        super(req);
     }
     /**
      * @param {string} message - The message you want to send to the user
      * @description - This method will send a string to the user
      */
-    send(message: any): void {
-        this.res.write(message);
+    send(message: string): void {
+        this.write(message);
     }
     /**
      * @param {string} absolutePath - The absolute path to the file you want to send to the user
@@ -29,12 +28,12 @@ export default class Response {
         mimeType =
             mimeType || mime.lookup(absolutePath) || "application/octet-stream";
         const stat = fs.statSync(absolutePath);
-        this.res.writeHead(200, {
+        this.writeHead(200, {
             "Content-Type": mimeType,
             "Content-Length": stat.size,
         });
         const readStream: ReadStream = fs.createReadStream(absolutePath);
-        readStream.pipe(this.res);
+        readStream.pipe(this);
         this.sendingFile = true;
     }
     /**
@@ -46,36 +45,23 @@ export default class Response {
         mimeType =
             mimeType || mime.lookup(absolutePath) || "application/octet-stream";
         const stat = fs.statSync(absolutePath);
-        this.res.writeHead(200, {
+        this.writeHead(200, {
             "Content-Type": mimeType,
             "Content-Length": stat.size,
             "Content-Disposition": "attachment",
             filename: path.basename(absolutePath),
         });
         const readStream: ReadStream = fs.createReadStream(absolutePath);
-        readStream.pipe(this.res);
+        readStream.pipe(this);
         this.sendingFile = true;
     }
 
-    /**
-     * @returns {http.ServerResponse} Returns the original nodejs res object
-     * @description - Use this file if you want access to the original nodejs if MyFramework doesn't support the specific feature you want
-     */
-    getNodeResponseObject(): http.ServerResponse {
-        return this.res;
-    }
-    /**
-     * @description - Will end the transmission to the client, only use this if you know what you are doing
-     */
-    end(): void {
-        this.res.end();
-    }
     /**
      * Will send a object as JSON to the client - no other data can be sent after this
      * @param data A object that will be converted to JSON and sent to the client with json content type
      */
     json(data: object): void {
-        this.res.writeHead(200, {
+        this.writeHead(200, {
             "Content-Type": "application/json",
         });
         this.send(JSON.stringify(Object.assign(data, this.jsonAddData)));
@@ -85,7 +71,7 @@ export default class Response {
      * @param view An instance of the view object you want to render
      */
     render(view: View) {
-        this.res.writeHead(200, { "Content-Type": "text/html" });
+        this.writeHead(200, { "Content-Type": "text/html" });
         this.send(view.render());
     }
 
@@ -103,11 +89,11 @@ export default class Response {
                 cookieData += ";Path=" + options.path;
             }
         }
-        this.res.setHeader("Set-Cookie", cookieData);
+        this.setHeader("Set-Cookie", cookieData);
     }
 
     setStatusCode(code: number) {
-        this.res.statusCode = code;
+        this.statusCode = code;
     }
 }
 
