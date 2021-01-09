@@ -7,6 +7,7 @@ import Initialize from "@lib/Initialize";
 import Request from "@lib/Request";
 import Response from "@lib/Response";
 import { Model } from "@lib/Model";
+import { url } from "inspector";
 
 export default class Core {
     private port: number = parseInt(process.env.PORT) || 3000;
@@ -100,8 +101,11 @@ export default class Core {
             }
         }
 
+        // I use ts ignore below because I am calling private function and accessing private property
         // @ts-ignore
         req["body"] = await this.parseBody(req);
+        // @ts-ignore
+        req.parseCookies(); // I need to call it here instead of request constructor because headers are still empty at construction time
         controller.req = req;
         controller.res = res;
         if (

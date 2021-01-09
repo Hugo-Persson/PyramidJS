@@ -21,7 +21,7 @@ export default class Request extends http.IncomingMessage {
                 this.privateParam[element] = pathSegments[index + 1];
             }
         }
-        this.parsedCookies = this.parseCookies();
+        //this.parsedCookies = this.parseCookies();
         //this.body = body;
     }
 
@@ -36,7 +36,7 @@ export default class Request extends http.IncomingMessage {
             if (pairs.length != 2) return;
             result[pairs[0].trim()] = pairs[1];
         });
-        return result;
+        this.parsedCookies = result;
     }
 
     public get queryStrings(): object {

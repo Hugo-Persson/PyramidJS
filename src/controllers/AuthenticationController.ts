@@ -43,7 +43,10 @@ export default class AuthenticationController extends Controller {
                     id: user.id,
                     username: user.username,
                 });
-                this.res.send("SUCCESS, you are logged in");
+                this.res.json({
+                    error: false,
+                    message: "LoggedIn",
+                });
             } else {
                 this.res.setStatusCode(403); // Forbidden
                 this.res.json({ error: true, message: "WrongPassword" });
