@@ -37,8 +37,8 @@ export default class Controller {
     /**
      * @param {string} name - The name of the token, every token is a object
      * @param {Object} key - The values or value for the key you want to set, so if you want to set age and id pass {id: 420, age:69}
-     * @param {TokenAssignmentMethod=} assignmentMethod  - How the data should be processed if a token already exists
-     * @param {number=} expiration - When the token will expire, this setting will be affected by assignmentMethod setting
+     * @param {TokenAssignmentMethod=} assignmentMethod  - How the data should be processed if a token already exists. See wiki for more info
+     * @param {number=} expiration - When the token will expire in s, this setting will be affected by assignmentMethod setting
      */
     public async setTokenData(
         name: string,
@@ -50,6 +50,7 @@ export default class Controller {
             this.res.setCookie(name, await this.createToken(value), {
                 path: "/",
                 maxAge: expiration,
+                httpOnly: true,
             });
         } else if (assignmentMethod == TokenAssignmentMethod.append) {
             const cookie = this.req.cookies[name];
@@ -66,6 +67,7 @@ export default class Controller {
                         {
                             path: "/",
                             maxAge: expiration,
+                            httpOnly: true,
                         }
                     );
                 } catch (err) {
@@ -75,6 +77,7 @@ export default class Controller {
                         {
                             path: "/",
                             maxAge: expiration,
+                            httpOnly: true,
                         }
                     );
                 }
@@ -85,6 +88,7 @@ export default class Controller {
                     {
                         path: "/",
                         maxAge: expiration,
+                        httpOnly: true,
                     }
                 );
             }
@@ -99,7 +103,12 @@ export default class Controller {
                         await this.createToken(
                             Object.assign(data, value),
                             expiration
-                        )
+                        ),
+                        {
+                            path: "/",
+                            maxAge: expiration,
+                            httpOnly: true,
+                        }
                     );
                 } catch (err) {
                     this.res.setCookie(
@@ -108,6 +117,7 @@ export default class Controller {
                         {
                             path: "/",
                             maxAge: expiration,
+                            httpOnly: true,
                         }
                     );
                 }
@@ -118,6 +128,7 @@ export default class Controller {
                     {
                         path: "/",
                         maxAge: expiration,
+                        httpOnly: true,
                     }
                 );
             }
@@ -162,6 +173,7 @@ export default class Controller {
      */
     public async runAction(name: string, method: ActionType): Promise<boolean> {
         let action: string;
+
         if (method == ActionType.POST) {
             action = this.getAction("postActions", name);
         } else if (method == ActionType.GET) {

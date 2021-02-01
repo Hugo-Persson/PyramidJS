@@ -105,6 +105,8 @@ export default class Core {
         // @ts-ignore
         req["body"] = await this.parseBody(req);
         // @ts-ignore
+        req.parseUrlData();
+        // @ts-ignore
         req.parseCookies(); // I need to call it here instead of request constructor because headers are still empty at construction time
         controller.req = req;
         controller.res = res;

@@ -46,6 +46,8 @@ export default class AuthenticationController extends Controller {
                 this.res.json({
                     error: false,
                     message: "LoggedIn",
+                    userData: { username: user.username },
+                    expiration: Number(process.env.AUTHEXPIRATION) || 2592000,
                 });
             } else {
                 this.res.setStatusCode(403); // Forbidden
@@ -58,7 +60,13 @@ export default class AuthenticationController extends Controller {
     }
 
     private generateToken(data: object): Promise<void> {
-        return this.setTokenData("auth", data, TokenAssignmentMethod.overwrite); // TODO: Expiration day
+        const expiration = Number(process.env.AUTHEXPIRATION) || 2592000; // 30 days
+        return this.setTokenData(
+            "auth",
+            data,
+            TokenAssignmentMethod.overwrite,
+            expiration
+        ); // TODO: Expiration day
     }
     /**
      * register
@@ -106,7 +114,9 @@ export default class AuthenticationController extends Controller {
 
             this.res.json({
                 error: false,
-                message: "User created and you are signed in",
+                message: "Registered",
+                expiration: Number(process.env.AUTHEXPIRATION) || 2592000,
+                userData: { username: newUser.username },
             });
         } catch (error) {
             console.error(error);

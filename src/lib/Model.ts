@@ -18,7 +18,7 @@ export abstract class Model {
         this.tableColumns = Object.getPrototypeOf(this).tableColumns;
         this.primaryKeys = Object.getPrototypeOf(this).primaryKeys;
     }
-    public static startDatabaseConnection() {
+    public static startDatabaseConnection(): Promise<void> {
         return new Promise(async (resolve) => {
             this.dbPool = mariadb.createPool({
                 host: process.env.DB_HOST,
@@ -69,6 +69,7 @@ export abstract class Model {
         const query = `UPDATE ${this.getTableName} SET ${changedColumns.join(
             ", "
         )} WHERE ${whereStatement.join(" AND ")}`;
+
         const result: mariadb.UpsertResult = await Model.dbConnection.query(
             query,
             [changedValues, whereValues]
@@ -90,6 +91,7 @@ export abstract class Model {
         if (result.insertId && this.tableColumns.includes("id"))
             this["id"] = result.insertId;
 
+        console.log("QUE", result);
         return result;
     }
     //#endregion
@@ -205,6 +207,7 @@ export abstract class Model {
             queryString,
             String(this[primaryKey]) // I need to convert to string because if id = 0 it is ignored
         );
+        console.log("QUERY", queryString, String(this[primaryKey]));
         return queryResult.map((value) => {
             const obj: T = new relatedModel();
             for (const key in value) {

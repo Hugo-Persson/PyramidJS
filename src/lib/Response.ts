@@ -88,6 +88,18 @@ export default class Response extends http.ServerResponse {
             if (options.path) {
                 cookieData += ";Path=" + options.path;
             }
+            if (options.maxAge) {
+                cookieData += ";Max-Age=" + options.maxAge;
+            }
+            if (options.httpOnly) {
+                cookieData += ";HttpOnly";
+            }
+            if (options.sameSite) {
+                cookieData += ";SameSite=" + options.sameSite;
+            }
+            if (options.secure) {
+                cookieData += ";Secure";
+            }
         }
         this.setHeader("Set-Cookie", cookieData);
     }
