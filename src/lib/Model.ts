@@ -4,7 +4,7 @@ import mariadb from "mariadb";
 import { monitorEventLoopDelay } from "perf_hooks";
 import IJunctionTable from "./IJunctionTable";
 export abstract class Model {
-    private static dbConnection: mariadb.PoolConnection;
+    protected static dbConnection: mariadb.PoolConnection;
     private static dbPool: mariadb.Pool;
 
     protected static tableName: string;
