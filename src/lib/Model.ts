@@ -132,23 +132,21 @@ export abstract class Model {
         filter: T,
         limit: boolean = false
     ): Promise<Array<T>> {
-        const whereValues = [];
-        const filterColumns = [];
         if (!filter) {
             throw "No filter provided for getManyRowsByFilter function";
             return;
         }
-        filter.tableColumns.map((e) => {
-            if (filter[e]) {
-                whereValues.push(filter[e]);
-                filterColumns.push(`${e}=?`);
-            }
-        });
-        const query = `SELECT * FROM  ${filter.getTableName} ${
-            filterColumns.length ? "WHERE" : ""
-        } ${filterColumns.join(",")} ${limit ? `LIMIT 1 ` : ""} `;
 
-        const queryResult = await Model.dbConnection.query(query, whereValues);
+        const whereResult = this.whereFromFilter(filter);
+
+        const query = `SELECT * FROM  ${filter.getTableName} ${
+            whereResult.whereString
+        }  ${limit ? `LIMIT 1 ` : ""} `;
+
+        const queryResult = await Model.dbConnection.query(
+            query,
+            whereResult.whereValues
+        );
         const returnArray: Array<T> = [];
         const filterClass = Object.getPrototypeOf(filter).constructor;
         queryResult.map((value) => {
@@ -161,6 +159,25 @@ export abstract class Model {
             returnArray.push(tempModel);
         });
         return returnArray;
+    }
+
+    private static whereFromFilter<T extends Model>(
+        filter: T
+    ): IParseFilterResult {
+        const whereValues = [];
+        const filterColumns = [];
+        filter.tableColumns.map((e) => {
+            if (filter[e]) {
+                whereValues.push(filter[e]);
+                filterColumns.push(`${e}=?`);
+            }
+        });
+        let whereStatment = "";
+        if (filterColumns.length) {
+            whereStatment += "WHERE ";
+            whereStatment += filterColumns.join(",");
+        }
+        return { whereValues: whereValues, whereString: whereStatment };
     }
     //#endregion "fetching rows"
 
@@ -179,6 +196,33 @@ export abstract class Model {
             const result = await Model.dbConnection.query(query, whereValues);
             resolve(result.affectedRows);
         });
+    }
+
+    /**
+     * - Will delete rows from current table, the table is determined from the filter
+     * @param filter - An object of the current object that you want to filter after, if columns are set in the object the matching row need to match these column, NOTE: if not properties are set nothing will happen unless you pass unsafe to true
+     * @param unsafe - If the query should be unsafe, if it is unsafe an empty filter will result in all rows being deleted
+     */
+    public static async deleteFromFilter<T extends Model>(
+        filter: T,
+        unsafe: boolean
+    ) {
+        if (!filter) {
+            throw "No filter provided for deleteFromFilter function";
+        }
+        const whereResult = Model.whereFromFilter(filter);
+
+        if (whereResult.whereString === "" && !unsafe) {
+            console.log(
+                "Filter provided to deleteFromFilter does not have any values set, this would result in no where statement and all rows would be deleted from DB, set unsafe boolean to true if you want to delete all rows"
+            );
+            return;
+        }
+        const query = `DELETE FROM ${filter.getTableName} ${whereResult.whereString}`;
+        const result = await Model.dbConnection.query(
+            query,
+            whereResult.whereValues
+        );
     }
 
     //#endregion
@@ -317,4 +361,9 @@ export interface ColumnProperties {
     type: string;
     notNull?: boolean;
     autoIncrement?: boolean;
+}
+
+interface IParseFilterResult {
+    whereValues: Array<any>;
+    whereString: string;
 }
