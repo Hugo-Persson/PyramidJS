@@ -12,8 +12,14 @@ export default class Request extends http.IncomingMessage {
     readonly body: any;
     constructor(socket) {
         super(socket);
-        this.queryStringsSave = querystring.parse(this.url);
 
+        //this.parsedCookies = this.parseCookies();
+        //this.body = body;
+    }
+
+    private parseUrlData() {
+        // Called in core
+        this.queryStringsSave = querystring.parse(this.url);
         const pathSegments = this.url.split("/");
         if (pathSegments.length > 3) {
             for (let index = 3; index + 1 < pathSegments.length; index += 2) {
@@ -24,7 +30,6 @@ export default class Request extends http.IncomingMessage {
         //this.parsedCookies = this.parseCookies();
         //this.body = body;
     }
-
     private parseCookies(): object {
         if (!this.headers.cookie) {
             return {};

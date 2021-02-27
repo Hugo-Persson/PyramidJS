@@ -72,7 +72,7 @@ export abstract class Model {
 
         const result: mariadb.UpsertResult = await Model.dbConnection.query(
             query,
-            [changedValues, whereValues]
+            [...changedValues, ...whereValues]
         );
         return result;
     }
