@@ -6,9 +6,10 @@ import AuthenticationController from "@controllers/AuthenticationController";
 import User from "@models/User";
 import Car from "@models/Car";
 import UsersCars from "@models/Users-Cars";
+import { formidableWrapper } from "@lib/FormidableWrapper";
 
 export default class ExampleController extends Controller {
-    controllerSpecificMiddleware = [testMiddleware];
+    //controllerSpecificMiddleware = [testMiddleware];
 
     @GET
     public async tryJson() {
@@ -94,6 +95,13 @@ export default class ExampleController extends Controller {
     @GET
     public async tryHeaders() {
         this.res.send("TEST");
+    }
+
+    @POST
+    @addMiddleware([formidableWrapper])
+    public async tryFormData() {
+        console.log("Here", this.req.files);
+        this.res.json(this.req.files);
     }
 }
 async function testMiddleware(controller: Controller) {

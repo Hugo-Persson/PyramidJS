@@ -11,10 +11,12 @@ export function addMiddleware(stack: Array<Function>) {
     ) {
         const original = descriptor.value;
         descriptor.value = async function (...args: any[]) {
-            if (!(await executeMiddlewareStack(stack, this))) {
+            console.log("RUN");
+            if (await executeMiddlewareStack(stack, this)) {
                 return await original.apply(this, args);
             }
         };
+
         return descriptor;
     };
 }

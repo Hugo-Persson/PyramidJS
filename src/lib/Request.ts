@@ -10,6 +10,8 @@ export default class Request extends http.IncomingMessage {
     public authed = false;
 
     readonly body: any;
+
+    public files: IFiles;
     constructor(socket) {
         super(socket);
 
@@ -56,4 +58,14 @@ export default class Request extends http.IncomingMessage {
     /* public get method(): ActionType {
         return ActionType[this.req.method];
     } */
+}
+
+export interface IFiles {
+    [key: string]: IFile;
+}
+export interface IFile {
+    path: string;
+    name: string;
+    type: string;
+    size: number;
 }
