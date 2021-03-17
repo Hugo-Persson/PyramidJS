@@ -19,7 +19,7 @@ export function formidableWrapper(controller: Controller) {
         }
         const form = formidable({
             multiples: true,
-            uploadDir: process.cwd() + "/tmp/",
+            uploadDir: process.cwd() + process.env.FILE_SAVE_DIR || "/tmp/",
         });
 
         const files = [];
